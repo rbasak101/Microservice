@@ -1,1 +1,1 @@
-# cs240-fa21_release
+# CS 240: Introduction to Computer Systems (Fall 2021)
