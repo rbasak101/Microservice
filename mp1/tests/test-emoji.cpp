@@ -18,9 +18,17 @@
  */
 int isEmoji(const char *s) {
   unsigned int val = *((unsigned int *)s);
+  unsigned int tmp = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+  unsigned int rval = (tmp << 16) | (tmp >> 16);
   return
-    (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
-    (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ );
+    (
+      (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
+      (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ )
+    ) ||
+    ( /* Reverse Byte Order - (unsigned int converts to 4-bytes) */
+      (rval >= 3800087552 /* U+203C */ && val <= 3817511168 /* U+3299 */) ||
+      (rval >= 4036984960 /* U+1F000 */ && rval <= 4036995737 /* U+1FA99 */)
+    );
 }
 
 
