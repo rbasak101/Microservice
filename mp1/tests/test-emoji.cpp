@@ -1,3 +1,4 @@
+// Tests Updated (v2) on Sunday, Aug. 29
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,18 +18,16 @@
  * See Unicode's Emoji List: https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
  */
 int isEmoji(const char *s) {
-  unsigned int val = *((unsigned int *)s);
-  unsigned int tmp = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
-  unsigned int rval = (tmp << 16) | (tmp >> 16);
+  unsigned int val = 0;
+  for(int i=0;i<strlen(s);i++)
+  {
+    val = (val << 8) | ((unsigned int)(s[i]) & 0xFF);
+  }
   return
-    (
-      (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
-      (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ )
-    ) ||
-    ( /* Reverse Byte Order - (unsigned int converts to 4-bytes) */
-      (rval >= 3800087552 /* U+203C */ && val <= 3817511168 /* U+3299 */) ||
-      (rval >= 4036984960 /* U+1F000 */ && rval <= 4036995737 /* U+1FA99 */)
-    );
+  (
+    (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
+    (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ )
+  );
 }
 
 
@@ -68,7 +67,11 @@ TEST_CASE("`emoji_invertChar` inverts at least six total emojis", "[weight=3][pa
   unsigned int i;
   for (i = 4036984960; i <= 4036995737; i++) {
     char emoji[5];
-    memcpy(emoji, &i, 4);
+    /* memcpy() results depends on machine architecture and endian-ness */
+    emoji[0] = (i >> 24) & 0xFF;
+    emoji[1] = (i >> 16) & 0xFF;
+    emoji[2] = (i >> 8) & 0xFF;
+    emoji[3] = i & 0xFF;
     emoji[4] = '\0';
     emoji_invertChar(emoji);
 
