@@ -64,41 +64,69 @@ int emoji_count(char *utf8str) {
 void emoji_invertChar(char *utf8str) {
   // "\xF0\x9F\x98\x8A" (smiley face) to \xF0\x9F\x98\x9E 😞
   if(strcmp(utf8str, "\xF0\x9F\x98\x8A") == 0) {
-    *utf8str = "\xF0\x9F\x98\x9E";
+   // *utf8str = "\xF0\x9F\x98\x9E";
+    char *a = "\xF0\x9F\x98\x9E";
+    strcpy(utf8str, a);
   }
   // 😂 \xF0\x9F\x98\x82 to 😭 \xF0\x9F\x98\xAD
   if(strcmp(utf8str, "\xF0\x9F\x98\x82") == 0) {
-    *utf8str = "\xF0\x9F\x98\xAD";
+    // *utf8str = "\xF0\x9F\x98\xAD";
+    char *a = "\xF0\x9F\x98\xAD";
+    strcpy(utf8str, a);
   }
   // 🙈	\xF0\x9F\x99\x88 to 🙉  \xF0\x9F\x99\x89
   if(strcmp(utf8str, "\xF0\x9F\x99\x88") == 0) {
-    *utf8str = "\xF0\x9F\x99\x89";
+    // *utf8str = "\xF0\x9F\x99\x89";
+    char *a = "\xF0\x9F\x99\x89";
+    strcpy(utf8str, a);
+    
   }
   // 😷 \xF0\x9F\x98\xB7 to 😵  \xF0\x9F\x98\xB5
   if(strcmp(utf8str, "\xF0\x9F\x98\xB7") == 0) {
-    *utf8str = "\xF0\x9F\x98\xB5";
+   // *utf8str = "\xF0\x9F\x98\xB5";
+    char *a = "\xF0\x9F\x98\xB5";
+    strcpy(utf8str, a);
+    
   }
   // 😡 \xF0\x9F\x98\xA1 to  😨 \xF0\x9F\x98\xA8 
   if(strcmp(utf8str, "\xF0\x9F\x98\xA1") == 0) {
-    *utf8str = "\xF0\x9F\x98\xA8 ";
+    // *utf8str = "\xF0\x9F\x98\xA8";
+    char *a = "\xF0\x9F\x98\xA8";
+    strcpy(utf8str, a);
   }
-  // 😏 \xF0\x9F\x98\x8F to 😒 \xF0\x9F\x98\x92
+  // 😌 \xF0\x9F\x98\x8C to 😔 \xF0\x9F\x98\x94
+  if(strcmp(utf8str, "\xF0\x9F\x98\x8C") == 0) {
+    // *utf8str = "\xF0\x9F\x98\xA8";
+    char *a = "\xF0\x9F\x98\x94";
+    strcpy(utf8str, a);
+  }
+  // 😒 \xF0\x9F\x98\x92, 😌 \xF0\x9F\x98\x8C
  else {
-   *utf8str = "\xF0\x9F\x98\x8F";
+  // *utf8str = "\xF0\x9F\x98\x8F";
+    char *a = "\xF0\x9F\x98\x8C";
+    strcpy(utf8str, a);
  } 
  /* if(strcmp(utf8str, "\xF0\x9F\x98\x8F") == 0) {
     *utf8str = "\xF0\x9F\x98\x8F";
   } */
-
-
-
 }
 
 
 // Modify the UTF-8 string `utf8str` to invert ALL of the character by calling your
 // `emoji_invertChar` function on each character.
 void emoji_invertAll(char *utf8str) {
-  emoji_invertChar(utf8str);
+
+  int i = 0;
+  // char *inverted = malloc(sizeof(utf8str));
+  // char *s = { 0xf0, 0x9f, 0x98, 0x8e, 0};
+  // printf("%s\n", s); // (sunglass emoji)
+  while(i < strlen(utf8str)) {
+   char *emoji = &utf8str[i];
+   printf("%c", *emoji);
+   // emoji_invertChar(emoji);
+   i++;
+  }
+
 }
 
 
@@ -109,7 +137,6 @@ char *emoji_random_alloc() {
   int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
   int rand2 = rand() % 23 + 48;
   int rand3 = rand() % 23 + 48;
-  char decimalEmoji = strcat("")
   strcpy(emoji, "\xF0\x9F\x98\xB7");
   return emoji;
   //return NULL;

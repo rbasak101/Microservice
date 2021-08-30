@@ -88,6 +88,7 @@ TEST_CASE("`emoji_invertChar` inverts at least six total emojis", "[weight=3][pa
 TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") { // *
   char *s = malloc(100);
   strcpy(s, "\xF0\x9F\x92\x96 \xF0\x9F\x92\xBB \xF0\x9F\x8E\x89 \xF0\x9F\x98\x8A");
+  // printf("%d", strlen(s));
   emoji_invertAll(s);
   char *testing_emoji = malloc(20);
   strcpy(testing_emoji, s + 15);
