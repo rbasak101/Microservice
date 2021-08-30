@@ -106,6 +106,10 @@ void emoji_invertAll(char *utf8str) {
 // you return is a valid C-string that contains only one random emoji.
 char *emoji_random_alloc() {
   char *emoji = malloc(100);
+  int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
+  int rand2 = rand() % 23 + 48;
+  int rand3 = rand() % 23 + 48;
+  char decimalEmoji = strcat("")
   strcpy(emoji, "\xF0\x9F\x98\xB7");
   return emoji;
   //return NULL;
