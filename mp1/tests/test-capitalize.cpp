@@ -13,6 +13,24 @@ TEST_CASE("`capitalize` will capitalize a lowercase letter", "[weight=2][part=2]
   free(s);
 }
 
+TEST_CASE(" test case 1", "[weight=2][part=2]") {
+  char *s = malloc(100);
+  strcpy(s, "goodbye!");
+  capitalize(s);
+  // printf(s);
+  REQUIRE(strcmp(s, "Goodbye!") == 0);
+  free(s);
+}
+
+TEST_CASE(" test case 2", "[weight=2][part=2]") {
+  char *s = malloc(100);
+  strcpy(s, "cs240!");
+  capitalize(s);
+  // printf(s);
+  REQUIRE(strcmp(s, "Cs240!") == 0);
+  free(s);
+}
+
 TEST_CASE("`capitalize` will not modify an already capitalized letter", "[weight=2][part=2]") {
   char *s = malloc(100);
   strcpy(s, "HI!");
@@ -25,6 +43,7 @@ TEST_CASE("`capitalizeAll` will fully capitalize a lowercase string of letters",
   char *s = malloc(100);
   strcpy(s, "hello");
   capitalizeAll(s);
+  //printf(s);
   REQUIRE(strcmp(s, "HELLO") == 0);
   free(s);
 }
@@ -33,6 +52,7 @@ TEST_CASE("`capitalizeAll` will not modify numbers when capitalizing a string", 
   char *s = malloc(100);
   strcpy(s, "hi cs240");
   capitalizeAll(s);
+  printf(s);
   REQUIRE(strcmp(s, "HI CS240") == 0);
   free(s);
 }

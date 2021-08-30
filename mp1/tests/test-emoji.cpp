@@ -32,7 +32,7 @@ int isEmoji(const char *s) {
 }
 
 
-TEST_CASE("`emoji_favorite` returns a valid emoji", "[weight=1][part=3]") {
+TEST_CASE("emoji_favorite` returns a valid emoji", "[weight=1][part=3]") {
   const char *s = emoji_favorite();
   REQUIRE(strcmp(s, "") != 0);
   REQUIRE(isEmoji(s) != 0);
@@ -52,7 +52,7 @@ TEST_CASE("`emoji_count` counts multiple emoji", "[weight=3][part=3]") {
   int r = emoji_count(s);
   REQUIRE(r == 3);
   free(s);
-}
+} 
 
 TEST_CASE("`emoji_invertChar` inverts smiley face into another emoji", "[weight=1][part=3]") {
   char *s = malloc(100);
@@ -82,7 +82,7 @@ TEST_CASE("`emoji_invertChar` inverts at least six total emojis", "[weight=3][pa
   REQUIRE( emoji_invert_count >= 6 );
 }
 
-TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") {
+TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") { // *
   char *s = malloc(100);
   strcpy(s, "\xF0\x9F\x92\x96 \xF0\x9F\x92\xBB \xF0\x9F\x8E\x89 \xF0\x9F\x98\x8A");
   emoji_invertAll(s);
