@@ -11,22 +11,23 @@ const char *emoji_favorite() {
   //return "";
 }
 
-char* substr(const char *src, int m, int n)
-{
-    // get the length of the destination string
-    int len = n - m;
-    // allocate (len + 1) chars for destination (+1 for extra null character)
-    char *dest = (char*)malloc(sizeof(char) * (len + 1));
-    // extracts characters between m'th and n'th index from source string and copy them into the destination string
-    for (int i = m; i < n && (*(src + i) != '\0'); i++){
-        *dest = *(src + i);
-        dest++;
-    }
-    // null-terminate the destination string
-    *dest = '\0';
-    // return the destination string
-    return dest - len;
-}
+// char* substr(const char *src, int m, int n)
+// {
+//     // get the length of the destination string
+//     int len = n - m;
+//     // allocate (len + 1) chars for destination (+1 for extra null character)
+//     char *dest = (char*)malloc(sizeof(char) * (len + 1));
+//     // extracts characters between m'th and n'th index from source string and copy them into the destination string
+//     for (int i = m; i < n && (*(src + i) != '\0'); i++){
+//         *dest = *(src + i);
+//         dest++;
+//     }
+//     // null-terminate the destination string
+//     *dest = '\0';
+//     // return the destination string
+//     return dest - len;
+// }
+
 int substring_count(char* string, char* substring) {
   int count = 0;
   for(int i = 0; i < strlen(string) - strlen(substring) + 1; i++) {
@@ -69,33 +70,33 @@ void emoji_invertChar(char *utf8str) {
     strcpy(utf8str, a);
   }
   // 😂 \xF0\x9F\x98\x82 to 😭 \xF0\x9F\x98\xAD
-  if(strcmp(utf8str, "\xF0\x9F\x98\x82") == 0) {
+  else if(strcmp(utf8str, "\xF0\x9F\x98\x82") == 0) {
     // *utf8str = "\xF0\x9F\x98\xAD";
     char *a = "\xF0\x9F\x98\xAD";
     strcpy(utf8str, a);
   }
   // 🙈	\xF0\x9F\x99\x88 to 🙉  \xF0\x9F\x99\x89
-  if(strcmp(utf8str, "\xF0\x9F\x99\x88") == 0) {
+  else if(strcmp(utf8str, "\xF0\x9F\x99\x88") == 0) {
     // *utf8str = "\xF0\x9F\x99\x89";
     char *a = "\xF0\x9F\x99\x89";
     strcpy(utf8str, a);
     
   }
   // 😷 \xF0\x9F\x98\xB7 to 😵  \xF0\x9F\x98\xB5
-  if(strcmp(utf8str, "\xF0\x9F\x98\xB7") == 0) {
+  else if(strcmp(utf8str, "\xF0\x9F\x98\xB7") == 0) {
    // *utf8str = "\xF0\x9F\x98\xB5";
     char *a = "\xF0\x9F\x98\xB5";
     strcpy(utf8str, a);
     
   }
   // 😡 \xF0\x9F\x98\xA1 to  😨 \xF0\x9F\x98\xA8 
-  if(strcmp(utf8str, "\xF0\x9F\x98\xA1") == 0) {
+  else if(strcmp(utf8str, "\xF0\x9F\x98\xA1") == 0) {
     // *utf8str = "\xF0\x9F\x98\xA8";
     char *a = "\xF0\x9F\x98\xA8";
     strcpy(utf8str, a);
   }
   // 😌 \xF0\x9F\x98\x8C to 😔 \xF0\x9F\x98\x94
-  if(strcmp(utf8str, "\xF0\x9F\x98\x8C") == 0) {
+  else if(strcmp(utf8str, "\xF0\x9F\x98\x8C") == 0) {
     // *utf8str = "\xF0\x9F\x98\xA8";
     char *a = "\xF0\x9F\x98\x94";
     strcpy(utf8str, a);
@@ -106,38 +107,52 @@ void emoji_invertChar(char *utf8str) {
     char *a = "\xF0\x9F\x98\x8C";
     strcpy(utf8str, a);
  } 
- /* if(strcmp(utf8str, "\xF0\x9F\x98\x8F") == 0) {
-    *utf8str = "\xF0\x9F\x98\x8F";
-  } */
 }
 
 
 // Modify the UTF-8 string `utf8str` to invert ALL of the character by calling your
-// `emoji_invertChar` function on each character.
+// emoji_invertChar` function on each character.
 void emoji_invertAll(char *utf8str) {
-
-  int i = 0;
-  // char *inverted = malloc(sizeof(utf8str));
-  // char *s = { 0xf0, 0x9f, 0x98, 0x8e, 0};
-  // printf("%s\n", s); // (sunglass emoji)
-  while(i < strlen(utf8str)) {
-   char *emoji = &utf8str[i];
-   printf("%c", *emoji);
-   // emoji_invertChar(emoji);
-   i++;
+// 💖 💻 🎉 😊
+  // char *t;
+  // char *space = " ";
+  // for(int i = 0; i < strlen(utf8str); i++) {   //  utf8str[i] != '\0'
+  //   t = strtok(utf8str, space);
+  //   printf(t);
+  //   emoji_invertChar(t);
+  //   //printf(t);
+  // }
+  char *space = " ";
+  char *token = strtok(utf8str, space);
+  while(token != NULL) {   //  utf8str[i] != '\0'
+    emoji_invertChar(token);
+    //printf(token);
+    token = strtok(NULL, space);
+    
   }
-
 }
 
 
 // Return a random emoji stored in new heap memory you have allocated.  Make sure what
 // you return is a valid C-string that contains only one random emoji.
 char *emoji_random_alloc() {
+
   char *emoji = malloc(100);
   int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
   int rand2 = rand() % 23 + 48;
   int rand3 = rand() % 23 + 48;
   strcpy(emoji, "\xF0\x9F\x98\xB7");
   return emoji;
+
+  // char *emoji = malloc(100);
+  // emoji[0] = 49;
+  // emoji[1] = 102;
+  // emoji[2] = rand() % 10 + 48;
+  // emoji[3] = rand() % 55 + 48;
+  // // int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
+  // // int rand2 = rand() % 23 + 48;
+  // // int rand3 = rand() % 23 + 48;
+  // //strcpy(emoji, "\xF0\x9F\x98\xB7");
+  // return emoji;
   //return NULL;
 }

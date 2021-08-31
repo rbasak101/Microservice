@@ -91,7 +91,7 @@ TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") 
   // printf("%d", strlen(s));
   emoji_invertAll(s);
   char *testing_emoji = malloc(20);
-  strcpy(testing_emoji, s + 15);
+  strcpy(testing_emoji, s + 15); // gets the fourth emoji
   testing_emoji[4] = '\0';
   REQUIRE(strcmp(testing_emoji, "\xF0\x9F\x98\x8A") != 0);
   free(s);
