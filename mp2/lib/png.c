@@ -46,7 +46,8 @@ size_t PNG_read(PNG *png, PNG_Chunk *chunk) {
 /**
  * Writes a PNG chunk to `png`.
  * 
- * Returns the number of bytes written. 
+ * Returns the number of bytes written.   As part of writing the `chunk`, you must calculate the CRC
+ * based on the other data in the `chunk`; do not assume the CRC given has been calculated for you.
  */
 size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
   return 0;
