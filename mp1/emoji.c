@@ -136,23 +136,45 @@ void emoji_invertAll(char *utf8str) {
 // Return a random emoji stored in new heap memory you have allocated.  Make sure what
 // you return is a valid C-string that contains only one random emoji.
 char *emoji_random_alloc() {
+// (rand() % (upper - lower + 1)) + lower;
+  /*
+  \x80 <= Index 2 <= \xA7
+  \x80 <= index 3 <= \xBF
+  or   
 
-  char *emoji = malloc(100);
-  int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
-  int rand2 = rand() % 23 + 48;
-  int rand3 = rand() % 23 + 48;
-  strcpy(emoji, "\xF0\x9F\x98\xB7");
+  \x80  (128) <= Index 2 <= \xAB,  (171) in decimal : [128 - 171]
+  \x80 <= index 3 <= \xBF [128 - 191]
+*/
+  char hex_characters[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+  char *emoji = malloc(5 * sizeof(char)); // Generating the three hex values U+1F_ _ _
+  //char *decoy = malloc(5);
+  emoji[0] = 0xF0; 
+  emoji[1] = '\x9F'; 
+  char rand1 = hex_characters[(rand() % 3) + 8]; // 8, 9, A --> index 8,9,10
+  // char rand2 = hex_characters[rand() % 8 + 0]; // 0 to 7 --> index 0 to 7
+  char rand2 = hex_characters[(rand() % 12)]; // 0 to B --> index 0 to 11 // 
+  // emoji[2] = '\\x' + rand1 + rand2; // \xA7 // three different bytes  
+  emoji[2] = (rand() % 44) + 128; // \xA7
+  printf("%c", "\\x");
+  //decoy[0] = rand1 + rand2;
+  //emoji[2] = '\x98'; // \xA7
+  char rand3 = hex_characters[(rand() % 4) + 8]; // 8 to B --> index 8 to 11
+  char rand4 = hex_characters[(rand() % 16)]; // 0 to 15
+  //printf("%c", rand2);
+  // printf("%c", decoy[0]);
+  // printf("%c", rand1);
+  // printf("%c", rand2);
+  // printf("%c", rand3);
+  // printf("%c", rand4);
+  //printf("%c", " ****");
+  // printf("%c\n", "end");
+  //emoji[3] = '\x0' + rand3;
+  //emoji[3] = '\\x' + rand3 + rand4;
+  emoji[3] = (rand() % 64) + 128;
+  emoji[4] = '\0';
+  //printf("%c", emoji);
+  //printf("%c", r2);
   return emoji;
 
-  // char *emoji = malloc(100);
-  // emoji[0] = 49;
-  // emoji[1] = 102;
-  // emoji[2] = rand() % 10 + 48;
-  // emoji[3] = rand() % 55 + 48;
-  // // int rand1 = rand() % 10 + 48; // U+1F000 to U+1F9FF
-  // // int rand2 = rand() % 23 + 48;
-  // // int rand3 = rand() % 23 + 48;
-  // //strcpy(emoji, "\xF0\x9F\x98\xB7");
-  // return emoji;
-  //return NULL;
+
 }

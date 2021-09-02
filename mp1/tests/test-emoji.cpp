@@ -104,7 +104,17 @@ TEST_CASE("`emoji_random_alloc` allocates new memory", "[weight=1][part=3]") {
   free(s2);
   free(s1);
 }
+// TEST_CASE("testing output for rand", "[weight=3][part=3]") {
+//   const int total_emojis = 100;
+//   int valid_emoji = 0;
 
+//   for (int i = 0; i < 3; i++) {
+//     char *s = emoji_random_alloc();
+//     if (s != NULL && isEmoji(s)) { valid_emoji++; }
+//   }
+
+//   REQUIRE(0 == 1 );
+// }
 TEST_CASE("`emoji_random_alloc` allocates valid emoji", "[weight=3][part=3]") {
   const int total_emojis = 100;
   int valid_emoji = 0;
