@@ -31,7 +31,7 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
   FILE *file;
   file = fopen(filename, mode);
   unsigned char *buffer = malloc(8);
-  if(strcmp(mode, "r") ==0 || strcmp(mode, "r+") == 0) {   // input == "r+"  || input == 'r'
+  if(strcmp(mode, "r") == 0|| strcmp(mode, "r+") == 0) {   // input == "r+"  || input == 'r'
     // open file, verify PNG signature
     // FILE *file;
     // file = fopen(filename, mode);
@@ -46,7 +46,7 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
       }
     } 
   } else if(strcmp(mode, "w") == 0 && file != NULL) { 
-    printf("Entered");
+    //printf("Entered");
     //const unsigned char *buffer2[8] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
     // char *buffer2[8] = {'\x89', '\x50', '\x4e', '\x47', '\x0d', '\x0a', '\x1a', '\x0a'};
     // printf(sizeof(buffer2));
@@ -79,21 +79,53 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
  * Users of the library must call `PNG_free_chunk` on all returned chunks.
  */
 size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to chunk + return number of bytes of the data; 
-// Read the four byte chunk for length | then for type | then allocate the length for that chunk 
-// read the four byte crc | then return the number bytes of data length: 4 ifs
-  size_t size = 0;
-  // unsigned char *buffer = malloc(4);
-  // FILE *file = png->file;
-  // if(chunk != NULL) {
-  //   size += fread(chunk, 1, sizeof(uint32_t), file);
-  //   // size += fread(chunk->type, 1, sizeof(char), file);
-  //   // size += fread(chunk->data, 1, sizeof(char), file);
-  //   // size += fread(chunk->crc, 1, sizeof(uint32_t ), file);
-  //   printf("Entered read");
-  //   printf(size);
-  // }
+// Read the four byte chunk for length | then for type | then allocate the length for that chunk read the four byte crc | then return the number bytes of data length: 
+  size_t length = 0;
+  //unsigned char *buffer = malloc(4); why does this not work?  unsigned char *buffer = malloc(sizeof(uint32_t));
+  uint32_t *buffer = malloc(4);
+  if(png != NULL) {
+    FILE *f = png->file;
+    if(length == 0) {
+      printf("Reading 1st set \n");
+      length += fread(buffer, 1, sizeof(uint32_t), f); // read 1st 4 bytes length
+      chunk->len = ntohl(*buffer);
+      printf("%d\n", length);
+      printf("%d\n", chunk->len);
+      printf("\n");
+    }
+    // unsigned int length = (buffer[0]<<24) + (buffer[1]<<16) + (buffer[2] <<8) + (buffer[3] << 4);
+    if(length == 4) {
+      printf("Reading 2nd set \n");
+      length += fread(chunk->type, 1, sizeof(uint32_t), f);
+      printf("%d\n", length);
+      // chunk->type[0] = buffer[0]; 
+      // chunk->type[1] = buffer[1];
+      // chunk->type[2] = buffer[2];
+      // chunk->type[3] = buffer[3];
+      chunk->type[4] = '\x0';
+      printf("\n");
+      // printf("%c\n", chunk->type[0]);
+      // printf("%c\n", chunk->type[1]);
+      // printf("%c\n", chunk->type[2]);
+      // printf("%c\n", chunk->type[3]);
+      // printf("%c\n", chunk->type[4]);
+    }
 
-  return size;
+    if(length == 8) {
+      printf("Reading 3rd set \n");
+      chunk->data = malloc((sizeof(char)*chunk->len)); // need to allocate blocks of memory to store bytes: prevents the seg fault !!!
+      length += fread(chunk->data, sizeof(unsigned char), chunk->len, f);
+      printf("%d\n", length);
+      printf("\n");
+    }
+    if(length == chunk->len + 8) {
+      printf("Reading 4th set \n");
+      length += fread(&(chunk->crc), 1, sizeof(uint32_t), f);
+      printf("\n");
+    }
+
+    return length;
+  }
 }
 
 
@@ -120,6 +152,6 @@ void PNG_free_chunk(PNG_Chunk *chunk) {
  * Closes the PNG file and frees all memory related to `png`.
  */
 void PNG_close(PNG *png) {
-  // fclose(png);
+   //fclose(png);
   // free(png);
 }

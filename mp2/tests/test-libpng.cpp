@@ -23,87 +23,88 @@ TEST_CASE("`PNG_open` fails a non-PNG signature file", "[weight=1][part=1]") {
   system("rm TEST_hide.gif");
 }
 
-// TEST_CASE("`PNG_read` returns PNG file chunks correctly", "[weight=5][part=1]") {
-//   system("cp tests/files/240.png TEST_240.png");
+TEST_CASE("`PNG_read` returns PNG file chunks correctly", "[weight=5][part=1]") {
+  system("cp tests/files/240.png TEST_240.png");
 
-//   PNG *png;
-  
-//   png = PNG_open("TEST_240.png", "r");
-
-//   PNG_Chunk chunk;
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "IHDR") == 0);
-//   CHECK(chunk.len == 13);
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "sRGB") == 0);
-//   CHECK(chunk.len == 1);
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "gAMA") == 0);
-//   CHECK(chunk.len == 4);
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "pHYs") == 0);
-//   CHECK(chunk.len == 9);
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "IDAT") == 0);
-//   CHECK(chunk.len == 2351);
-
-//   PNG_read(png, &chunk);
-//   CHECK(strcmp(chunk.type, "IEND") == 0);
-//   CHECK(chunk.len == 0);
-
-//   PNG_close(png);
-//   system("rm TEST_240.png");
-// }
-
-// TEST_CASE("`PNG_read` return values correct", "[weight=1][part=1]") {
-//   system("cp tests/files/240.png TEST_240.png");
-
-//   PNG *png;
-  
-//   png = PNG_open("TEST_240.png", "r");
-
-//   PNG_Chunk chunk;
-
-//   CHECK(PNG_read(png, &chunk) == 25);   // IHDR
-//   CHECK(PNG_read(png, &chunk) == 13);   // sRGB
-//   CHECK(PNG_read(png, &chunk) == 16);   // gAMA
-//   CHECK(PNG_read(png, &chunk) == 21);   // pHYs
-//   CHECK(PNG_read(png, &chunk) == 2363); // IDAT
-//   CHECK(PNG_read(png, &chunk) == 12);   // IEND
-
-//   PNG_close(png);
-//   system("rm TEST_240.png");
-// }
-
-TEST_CASE("`PNG_open` writes a PNG header", "[weight=1][part=1]") {
   PNG *png;
-  png = PNG_open("TEST_output.png", "w");
-  REQUIRE(png != NULL);
-  PNG_close(png);
-
-  FILE *f = fopen("TEST_output.png", "r");
-  REQUIRE(f != NULL);
   
-  unsigned char *buffer = malloc(8);
-  fread(buffer, sizeof(char), 8, f);
-  fclose(f);
+  png = PNG_open("TEST_240.png", "r");
 
-  CHECK( buffer[0] == 0x89 );
-  CHECK( buffer[1] == 0x50 );
-  CHECK( buffer[2] == 0x4e );
-  CHECK( buffer[3] == 0x47 );
-  CHECK( buffer[4] == 0x0d );
-  CHECK( buffer[5] == 0x0a );
-  CHECK( buffer[6] == 0x1a );
-  CHECK( buffer[7] == 0x0a );
+  PNG_Chunk chunk;
 
-  system("rm TEST_output.png");
+  PNG_read(png, &chunk);
+  //printf("Value:  %c\n", chunk.type);
+  CHECK(strcmp(chunk.type, "IHDR") == 0);
+  CHECK(chunk.len == 13);
+
+  PNG_read(png, &chunk);
+  CHECK(strcmp(chunk.type, "sRGB") == 0);
+  CHECK(chunk.len == 1);
+
+  PNG_read(png, &chunk);
+  CHECK(strcmp(chunk.type, "gAMA") == 0);
+  CHECK(chunk.len == 4);
+
+  PNG_read(png, &chunk);
+  CHECK(strcmp(chunk.type, "pHYs") == 0);
+  CHECK(chunk.len == 9);
+
+  PNG_read(png, &chunk);
+  CHECK(strcmp(chunk.type, "IDAT") == 0);
+  CHECK(chunk.len == 2351);
+
+  PNG_read(png, &chunk);
+  CHECK(strcmp(chunk.type, "IEND") == 0);
+  CHECK(chunk.len == 0);
+
+  PNG_close(png);
+  system("rm TEST_240.png");
 }
+
+TEST_CASE("`PNG_read` return values correct", "[weight=1][part=1]") {
+  system("cp tests/files/240.png TEST_240.png");
+
+  PNG *png;
+  
+  png = PNG_open("TEST_240.png", "r");
+
+  PNG_Chunk chunk;
+
+  CHECK(PNG_read(png, &chunk) == 25);   // IHDR
+  CHECK(PNG_read(png, &chunk) == 13);   // sRGB
+  CHECK(PNG_read(png, &chunk) == 16);   // gAMA
+  CHECK(PNG_read(png, &chunk) == 21);   // pHYs
+  CHECK(PNG_read(png, &chunk) == 2363); // IDAT
+  CHECK(PNG_read(png, &chunk) == 12);   // IEND
+
+  PNG_close(png);
+  system("rm TEST_240.png");
+}
+
+// TEST_CASE("`PNG_open` writes a PNG header", "[weight=1][part=1]") {
+//   PNG *png;
+//   png = PNG_open("TEST_output.png", "w");
+//   REQUIRE(png != NULL);
+//   PNG_close(png);
+
+//   FILE *f = fopen("TEST_output.png", "r");
+//   REQUIRE(f != NULL);
+  
+//   unsigned char *buffer = malloc(8);
+//   fread(buffer, sizeof(char), 8, f);
+//   fclose(f);
+
+//   CHECK( buffer[0] == 0x89 );
+//   CHECK( buffer[1] == 0x50 );
+//   CHECK( buffer[2] == 0x4e );
+//   CHECK( buffer[3] == 0x47 );
+//   CHECK( buffer[4] == 0x0d );
+//   CHECK( buffer[5] == 0x0a );
+//   CHECK( buffer[6] == 0x1a );
+//   CHECK( buffer[7] == 0x0a );
+
+//   system("rm TEST_output.png");
+// }
 
 
 // TEST_CASE("`PNG_write` writes a PNG chunk and CRC", "[weight=1][part=1]") {
