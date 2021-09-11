@@ -79,7 +79,7 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
  * Any memory allocated within `chunk` must be freed in `PNG_free_chunk`.
  * Users of the library must call `PNG_free_chunk` on all returned chunks.
  */
-size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to chunk + return number of bytes of the data; 
+size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to chunk + return number of bytes of the data;  // PNG to chunk
 // Read the four byte chunk for length | then for type | then allocate the length for that chunk read the four byte crc | then return the number bytes of data length: 
   //chunk = malloc(sizeof(PNG_Chunk));               //trial to resolve free_chunk
   size_t length = 0;
@@ -138,7 +138,7 @@ size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to
  * Returns the number of bytes written.   As part of writing the `chunk`, you must calculate the CRC
  * based on the other data in the `chunk`; do not assume the CRC given has been calculated for you.
  */
-size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
+size_t PNG_write(PNG *png, PNG_Chunk *chunk) {  // Chunk to PNG
   // write contents from chunk to png
   // we know length, type, data;
   // Read the 1st 4 bytes of chunk(length) and then write that chunk | read 2nd set then write ...
@@ -177,7 +177,6 @@ size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
   fwrite(&new_crc, 1, sizeof(uint32_t), f);
   written += sizeof(uint32_t);
 
-  free(buffer); // chunk_free fix
   return written;
 }
 
@@ -186,7 +185,7 @@ size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
  * Frees all memory allocated by this library related to `chunk`.
  */
 void PNG_free_chunk(PNG_Chunk *chunk) {
-  printf("%p\n", &chunk);
+  // printf("%p\n", &chunk);
   if(chunk != NULL) {
    free(chunk->data);
   }
