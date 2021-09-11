@@ -59,9 +59,10 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
     buffer[6] = 0x1a;
     buffer[7] = 0x0a;
     fwrite(buffer, sizeof(char), sizeof(buffer), file);
-    fclose(file); // NEED TO INCLUDE THIS WHEN WRITING!!!
+    //
     PNG *png = malloc(sizeof(PNG)); 
     png->file = file;
+    //fclose(file);
     return png;
   }
   return NULL;
@@ -80,52 +81,54 @@ PNG * PNG_open(const char *filename, const char *mode) { // filename = 0x54 0x45
  */
 size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to chunk + return number of bytes of the data; 
 // Read the four byte chunk for length | then for type | then allocate the length for that chunk read the four byte crc | then return the number bytes of data length: 
+  //chunk = malloc(sizeof(PNG_Chunk));               //trial to resolve free_chunk
   size_t length = 0;
-  //unsigned char *buffer = malloc(4); why does this not work?  unsigned char *buffer = malloc(sizeof(uint32_t));
   uint32_t *buffer = malloc(4);
   if(png != NULL) {
     FILE *f = png->file;
-    if(length == 0) {
-      printf("Reading 1st set \n");
-      length += fread(buffer, 1, sizeof(uint32_t), f); // read 1st 4 bytes length
-      chunk->len = ntohl(*buffer);
-      printf("%d\n", length);
-      printf("%d\n", chunk->len);
-      printf("\n");
-    }
-    // unsigned int length = (buffer[0]<<24) + (buffer[1]<<16) + (buffer[2] <<8) + (buffer[3] << 4);
-    if(length == 4) {
-      printf("Reading 2nd set \n");
-      length += fread(chunk->type, 1, sizeof(uint32_t), f);
-      printf("%d\n", length);
-      // chunk->type[0] = buffer[0]; 
-      // chunk->type[1] = buffer[1];
-      // chunk->type[2] = buffer[2];
-      // chunk->type[3] = buffer[3];
-      chunk->type[4] = '\x0';
-      printf("\n");
-      // printf("%c\n", chunk->type[0]);
-      // printf("%c\n", chunk->type[1]);
-      // printf("%c\n", chunk->type[2]);
-      // printf("%c\n", chunk->type[3]);
-      // printf("%c\n", chunk->type[4]);
-    }
+    if(f != NULL) {
+      if(length == 0) {
+        //printf("Reading 1st set \n");
+        length += fread(buffer, 1, sizeof(uint32_t), f); // read 1st 4 bytes length
+        chunk->len = ntohl(*buffer);
+        // printf("%d\n", length);
+        // printf("%d\n", chunk->len);
+        // printf("\n");
+      }
+      // unsigned int length = (buffer[0]<<24) + (buffer[1]<<16) + (buffer[2] <<8) + (buffer[3] << 4);
+      if(length == 4) {
+        //printf("Reading 2nd set \n");
+        length += fread(chunk->type, 1, sizeof(uint32_t), f);
+        //printf("%d\n", length);
+        // chunk->type[0] = buffer[0]; 
+        // chunk->type[1] = buffer[1];
+        // chunk->type[2] = buffer[2];
+        // chunk->type[3] = buffer[3];
+        chunk->type[4] = '\x0';
+        //printf("\n");
+        // printf("%c\n", chunk->type[0]);
+        // printf("%c\n", chunk->type[1]);
+        // printf("%c\n", chunk->type[2]);
+        // printf("%c\n", chunk->type[3]);
+        // printf("%c\n", chunk->type[4]);
+      }
+      if(length == 8) {
+        //printf("Reading 3rd set \n");
+        chunk->data = malloc(chunk->len); // need to allocate blocks of memory to store bytes: prevents the seg fault !!! --> free(chunk->data)
+        length += fread(chunk->data, sizeof(unsigned char), chunk->len, f);
+        // printf("%d\n", length);
+        // printf("\n");
+      }
+      if(length == chunk->len + 8) {
+       // printf("Reading 4th set \n");
+        length += fread(&(chunk->crc), 1, sizeof(uint32_t), f);
+        //printf("\n");
+      }
 
-    if(length == 8) {
-      printf("Reading 3rd set \n");
-      chunk->data = malloc((sizeof(char)*chunk->len)); // need to allocate blocks of memory to store bytes: prevents the seg fault !!!
-      length += fread(chunk->data, sizeof(unsigned char), chunk->len, f);
-      printf("%d\n", length);
-      printf("\n");
     }
-    if(length == chunk->len + 8) {
-      printf("Reading 4th set \n");
-      length += fread(&(chunk->crc), 1, sizeof(uint32_t), f);
-      printf("\n");
-    }
-
     return length;
   }
+
 }
 
 
@@ -136,7 +139,46 @@ size_t PNG_read(PNG *png, PNG_Chunk *chunk) { // populate chunk data from png to
  * based on the other data in the `chunk`; do not assume the CRC given has been calculated for you.
  */
 size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
-  return 0;
+  // write contents from chunk to png
+  // we know length, type, data;
+  // Read the 1st 4 bytes of chunk(length) and then write that chunk | read 2nd set then write ...
+  size_t written = 0;
+
+  // length bytes:
+  //printf("%d\n", chunk->len);
+  FILE *f = png->file;
+  uint32_t order = htonl(chunk->len);
+  printf("%d\n", written);
+
+  //printf("%d\n", ftell(f));
+  fwrite(&order, 1, sizeof(uint32_t), f);   // must follow with fclose after fwrite
+  written = sizeof(uint32_t);
+  printf("%d\n", written);
+  //fclose(f);
+
+  // type bytes:
+  fwrite(chunk->type, sizeof(char), sizeof(uint32_t), f);
+  written += sizeof(uint32_t);
+  printf("%d\n", written);
+
+  // // data types:
+  fwrite(chunk->data, sizeof(char), chunk->len, f);
+  written += chunk->len; // chunk->len vs temp
+  printf("%d\n", written);
+
+  // // CRC calculation + type:
+  unsigned char *buffer = malloc((sizeof(uint32_t) + chunk->len));
+  memcpy(buffer, chunk->type, sizeof(uint32_t)); // store 4 bytes of chunk->type into buffer
+  memcpy(buffer + sizeof(uint32_t), chunk->data, chunk->len);
+  uint32_t crc = 0;
+  crc32(buffer, chunk->len + sizeof(uint32_t), &crc);
+  
+  uint32_t new_crc = htonl(crc);
+  fwrite(&new_crc, 1, sizeof(uint32_t), f);
+  written += sizeof(uint32_t);
+
+  free(buffer); // chunk_free fix
+  return written;
 }
 
 
@@ -144,7 +186,10 @@ size_t PNG_write(PNG *png, PNG_Chunk *chunk) {
  * Frees all memory allocated by this library related to `chunk`.
  */
 void PNG_free_chunk(PNG_Chunk *chunk) {
-  free(chunk);
+  printf("%p\n", &chunk);
+  if(chunk != NULL) {
+   free(chunk->data);
+  }
 }
 
 
@@ -152,6 +197,8 @@ void PNG_free_chunk(PNG_Chunk *chunk) {
  * Closes the PNG file and frees all memory related to `png`.
  */
 void PNG_close(PNG *png) {
-   //fclose(png);
-  // free(png);
+  if(png != NULL) {
+   fclose(png->file);
+   free(png);
+  }
 }
