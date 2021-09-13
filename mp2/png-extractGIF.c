@@ -22,22 +22,22 @@ int png_extractGIF(const char *png_filename, const char *gif_filename) {
 
     if(strcmp(chunk.type, "uiuc") == 0 ) {
       // unsigned char *buffer = malloc(12 + chunk.len);
-      printf("%d\n", 25);
-      printf("%d\n", byte_chunk); // read 633438 bytes | chunk.len = 633426 (of data)
-      printf("%d\n", chunk.len);
+      // printf("%d\n", 25);
+      // printf("%d\n", byte_chunk); // read 633438 bytes | chunk.len = 633426 (of data)
+      // printf("%d\n", chunk.len);
       FILE *gif;
       gif = fopen(gif_filename, "w+");
       size_t written = 0; // uint32_t written = 0;
-      printf("%p\n", &chunk);
-      printf("pointer address: %p\n", &(chunk.data));
-      printf("data pointer address: %p\n", chunk.data);
+      //printf("%p\n", &chunk);
+      // printf("pointer address: %p\n", &(chunk.data));
+      // printf("data pointer address: %p\n", chunk.data);
       if(gif != NULL) {
         //printf("%p\n", &gif);
-        printf("size %u\n", sizeof(PNG_Chunk));
+        // printf("size %u\n", sizeof(PNG_Chunk));
         written += fwrite(chunk.data, 1, chunk.len, gif);
         fclose(gif);
-        printf("%d\n", written);
-        printf("%d\n", 36);
+        // printf("%d\n", written);
+        // printf("%d\n", 36);
       }
       break;  
     }
@@ -57,6 +57,5 @@ int main(int argc, char *argv[]) {
     printf("Usage: %s <PNG File> <GIF Name>\n", argv[0]);
     return ERROR_INVALID_PARAMS;
   }
-
   return png_extractGIF(argv[1], argv[2]);
 }

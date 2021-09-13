@@ -148,23 +148,23 @@ size_t PNG_write(PNG *png, PNG_Chunk *chunk) {  // Chunk to PNG
   //printf("%d\n", chunk->len);
   FILE *f = png->file;
   uint32_t order = htonl(chunk->len);
-  printf("%d\n", written);
+  //printf("%d\n", written);
 
   //printf("%d\n", ftell(f));
   fwrite(&order, 1, sizeof(uint32_t), f);   // must follow with fclose after fwrite
   written = sizeof(uint32_t);
-  printf("%d\n", written);
+  //printf("%d\n", written);
   //fclose(f);
 
   // type bytes:
   fwrite(chunk->type, sizeof(char), sizeof(uint32_t), f);
   written += sizeof(uint32_t);
-  printf("%d\n", written);
+  //printf("%d\n", written);
 
   // // data types:
   fwrite(chunk->data, sizeof(char), chunk->len, f);
   written += chunk->len; // chunk->len vs temp
-  printf("%d\n", written);
+  //printf("%d\n", written);
 
   // // CRC calculation + type:
   unsigned char *buffer = malloc((sizeof(uint32_t) + chunk->len));
