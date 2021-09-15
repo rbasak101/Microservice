@@ -61,7 +61,7 @@ TEST_CASE("Test Sample1 - Block Splitting", "[weight=10][part=2]") {
   system("./mstats tests/samples_exe/sample1 evaluate");
   mstats_result * result = read_mstats_result("mstats_result.txt");
   REQUIRE(result->status == 1);
-  REQUIRE(result->max_heap_used < 1100);
+  REQUIRE(result->max_heap_used < 1200);
   REQUIRE(result->max_heap_used > 0);
   system("rm mstats_result.txt");
 }
