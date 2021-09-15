@@ -8,7 +8,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 5,
-      "points": 1
+      "points": 10
     },
     {
       "name": "Test Tester2",
@@ -18,7 +18,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 5,
-      "points": 1
+      "points": 10
     },
     {
       "name": "Test Tester3",
@@ -28,7 +28,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 5,
-      "points": 1
+      "points": 10
     },
     {
       "name": "Test Tester4",
@@ -38,7 +38,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 5,
-      "points": 1
+      "points": 10
     },
     {
       "name": "Test Tester5",
@@ -48,7 +48,7 @@
       "output": "",
       "comparison": "included",
       "timeout": 5,
-      "points": 1
+      "points": 10
     }
   ]
 }
