@@ -10,7 +10,10 @@
 typedef struct _metadata_t {
   unsigned int size;     // The size of the memory block.
   unsigned char isUsed;  // 0 if the block is free; 1 if the block is used.
+  // void *next;
 } metadata_t;
+
+int free_blocks = 0;
 
 /**
  * Allocate space for array in memory
@@ -84,14 +87,14 @@ void *malloc(size_t size) {
   }
 
   // Print out data about each metadata chunk:
-  metadata_t *curMeta = startOfHeap;
-  void *endOfHeap = sbrk(0);
-  printf("-- Start of Heap (%p) --\n", startOfHeap);
-  while ((void *)curMeta < endOfHeap) {   
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
-  }
-  printf("-- End of Heap (%p) --\n\n", endOfHeap);
+  // metadata_t *curMeta = startOfHeap;
+  // void *endOfHeap = sbrk(0);
+  // printf("-- Start of Heap (%p) --\n", startOfHeap);
+  // while ((void *)curMeta < endOfHeap) {   
+  //   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  // }
+  // printf("-- End of Heap (%p) --\n\n", endOfHeap);
 
   metadata_t *meta = sbrk( sizeof(metadata_t) );
   meta->size = size;
@@ -101,6 +104,26 @@ void *malloc(size_t size) {
   return ptr;
  //  return NULL;
 }
+
+// void *split(size_t new_size) {
+//   if(new_size <= 0) {
+//     return NULL;
+//   }
+//   metadata_t *traverse_meta = startOfHeap;
+//   if(free_blocks > 0) { // free must have been called
+//     while(traverse_meta != NULL) {
+//       if(new_size <= traverse_meta->size && traverse_meta->isUsed == 0) { // free and big space
+//         meta_data_t *new_free_block = sizeof(meta_data_t) + size //shift ptr up
+//         new_block->size = traverse_meta->size - sizeof(meta_data_t) - new_size;
+//         new_block->isUsed = 0;
+//         new_block->next = traverse_meta;
+//         break;
+
+//       }
+//       traverse_meta = traverse_meta->next;
+//     }
+//   } 
+// }
 
 void print_heap(size_t size) {
 
@@ -140,7 +163,7 @@ void free(void *ptr) {
   }
   metadata_t *meta = ptr - sizeof(metadata_t);
   meta->isUsed = 0;
-
+  free_blocks += 1;
 }
 
 
