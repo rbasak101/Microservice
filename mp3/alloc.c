@@ -37,7 +37,15 @@ typedef struct _metadata_t {
  */
 void *calloc(size_t num, size_t size) {
     // implement calloc:
-    return NULL;
+    if(size == 0 || num == 0) {
+      return NULL;
+    }
+    void *block = malloc(num * size);
+   // if(block != NULL) {
+    memset(block, 0, num * size); //sets first num*size bytes to 0
+   // }
+    return block;
+    //return NULL;
 }
 
 
@@ -66,9 +74,48 @@ void *startOfHeap = NULL;
 
 void *malloc(size_t size) {
   // implement malloc
-  return NULL;
+  printf("Inside: malloc(%lu):\n", size);
+  if(size == 0) {
+    return NULL;
+  }
+  // // If we have not recorded the start of the heap, record it:
+  if (startOfHeap == NULL) {
+    startOfHeap = sbrk(0);
+  }
+
+  // Print out data about each metadata chunk:
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  printf("-- Start of Heap (%p) --\n", startOfHeap);
+  while ((void *)curMeta < endOfHeap) {   
+    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  }
+  printf("-- End of Heap (%p) --\n\n", endOfHeap);
+
+  metadata_t *meta = sbrk( sizeof(metadata_t) );
+  meta->size = size;
+  meta->isUsed = 1;
+
+  void *ptr = sbrk(size);
+  return ptr;
+ //  return NULL;
 }
 
+void print_heap(size_t size) {
+
+  printf("Inside: malloc(%lu):\n", size);
+
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  printf("-- Start of Heap (%p) --\n", startOfHeap);
+  while ((void *)curMeta < endOfHeap) {   // While we're before the end of the heap...
+    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  }
+  printf("-- End of Heap (%p) --\n\n", endOfHeap);
+
+}
 
 /**
  * Deallocate space in memory
@@ -88,6 +135,12 @@ void *malloc(size_t size) {
  */
 void free(void *ptr) {
   // implement free
+  if(ptr == NULL) {
+    return;
+  }
+  metadata_t *meta = ptr - sizeof(metadata_t);
+  meta->isUsed = 0;
+
 }
 
 
@@ -138,5 +191,26 @@ void free(void *ptr) {
  */
 void *realloc(void *ptr, size_t size) {
     // implement realloc:
+    if((size == 0) | (size == 0 && ptr != NULL)) {
+      free(ptr);
+      return NULL;
+    }
+    if(ptr == NULL ) {
+      return malloc(size);
+    }
+    
+    void *block = ptr - sizeof(metadata_t);
+    metadata_t *meta = (metadata_t *) block;
+
+    if(size <= meta->size && ptr != NULL) {
+      return ptr;
+    }
+
+    void *size_change = malloc(size);
+    if(size_change != NULL) {
+      memcpy(size_change, ptr, meta->size);
+      free(ptr);
+      return size_change;
+    }
     return NULL;
 }
