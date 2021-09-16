@@ -41,11 +41,11 @@ void *calloc(size_t num, size_t size) {
       return NULL;
     }
     void *block = malloc(num * size);
-   // if(block != NULL) {
-    memset(block, 0, num * size); //sets first num*size bytes to 0
-   // }
+    if(block != NULL) {
+      memset(block, 0, num * size);
+    }
     return block;
-    //return NULL;
+    // return NULL;
 }
 
 

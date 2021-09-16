@@ -1,3 +1,4 @@
+// Tests Updated (v2) on Sunday, Aug. 29
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,22 +18,20 @@
  * See Unicode's Emoji List: https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
  */
 int isEmoji(const char *s) {
-  unsigned int val = *((unsigned int *)s);
-  unsigned int tmp = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
-  unsigned int rval = (tmp << 16) | (tmp >> 16);
+  unsigned int val = 0;
+  for(int i=0;i<strlen(s);i++)
+  {
+    val = (val << 8) | ((unsigned int)(s[i]) & 0xFF);
+  }
   return
-    (
-      (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
-      (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ )
-    ) ||
-    ( /* Reverse Byte Order - (unsigned int converts to 4-bytes) */
-      (rval >= 3800087552 /* U+203C */ && val <= 3817511168 /* U+3299 */) ||
-      (rval >= 4036984960 /* U+1F000 */ && rval <= 4036995737 /* U+1FA99 */)
-    );
+  (
+    (val >= 14844092 /* U+203C */ && val <= 14912153 /* U+3299 */) ||
+    (val >= 4036984960 /* U+1F000 */ && val <= 4036995737 /* U+1FA99 */ )
+  );
 }
 
 
-TEST_CASE("`emoji_favorite` returns a valid emoji", "[weight=1][part=3]") {
+TEST_CASE("emoji_favorite` returns a valid emoji", "[weight=1][part=3]") {
   const char *s = emoji_favorite();
   REQUIRE(strcmp(s, "") != 0);
   REQUIRE(isEmoji(s) != 0);
@@ -52,7 +51,7 @@ TEST_CASE("`emoji_count` counts multiple emoji", "[weight=3][part=3]") {
   int r = emoji_count(s);
   REQUIRE(r == 3);
   free(s);
-}
+} 
 
 TEST_CASE("`emoji_invertChar` inverts smiley face into another emoji", "[weight=1][part=3]") {
   char *s = malloc(100);
@@ -68,7 +67,11 @@ TEST_CASE("`emoji_invertChar` inverts at least six total emojis", "[weight=3][pa
   unsigned int i;
   for (i = 4036984960; i <= 4036995737; i++) {
     char emoji[5];
-    memcpy(emoji, &i, 4);
+    /* memcpy() results depends on machine architecture and endian-ness */
+    emoji[0] = (i >> 24) & 0xFF;
+    emoji[1] = (i >> 16) & 0xFF;
+    emoji[2] = (i >> 8) & 0xFF;
+    emoji[3] = i & 0xFF;
     emoji[4] = '\0';
     emoji_invertChar(emoji);
 
@@ -82,12 +85,13 @@ TEST_CASE("`emoji_invertChar` inverts at least six total emojis", "[weight=3][pa
   REQUIRE( emoji_invert_count >= 6 );
 }
 
-TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") {
+TEST_CASE("`emoji_invertAll` inverts a string of emojis", "[weight=3][part=3]") { // *
   char *s = malloc(100);
   strcpy(s, "\xF0\x9F\x92\x96 \xF0\x9F\x92\xBB \xF0\x9F\x8E\x89 \xF0\x9F\x98\x8A");
+  // printf("%d", strlen(s));
   emoji_invertAll(s);
   char *testing_emoji = malloc(20);
-  strcpy(testing_emoji, s + 15);
+  strcpy(testing_emoji, s + 15); // gets the fourth emoji
   testing_emoji[4] = '\0';
   REQUIRE(strcmp(testing_emoji, "\xF0\x9F\x98\x8A") != 0);
   free(s);
@@ -100,7 +104,17 @@ TEST_CASE("`emoji_random_alloc` allocates new memory", "[weight=1][part=3]") {
   free(s2);
   free(s1);
 }
+// TEST_CASE("testing output for rand", "[weight=3][part=3]") {
+//   const int total_emojis = 100;
+//   int valid_emoji = 0;
 
+//   for (int i = 0; i < 3; i++) {
+//     char *s = emoji_random_alloc();
+//     if (s != NULL && isEmoji(s)) { valid_emoji++; }
+//   }
+
+//   REQUIRE(0 == 1 );
+// }
 TEST_CASE("`emoji_random_alloc` allocates valid emoji", "[weight=3][part=3]") {
   const int total_emojis = 100;
   int valid_emoji = 0;
