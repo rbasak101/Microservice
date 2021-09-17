@@ -11,7 +11,6 @@
 typedef struct _metadata_t {
   unsigned int size;     // The size of the memory block.
   unsigned char isUsed;  // 0 if the block is free; 1 if the block is used.
-  // void *next;
 } metadata_t;
 
 int free_blocks = 0;
@@ -75,6 +74,7 @@ void *calloc(size_t num, size_t size) {
  * @see http://www.cplusplus.com/reference/clibrary/cstdlib/malloc/
  */
 void *startOfHeap = NULL;
+void *split(size_t new_size);
 
 void *malloc(size_t size) {
   // implement malloc
@@ -86,10 +86,9 @@ void *malloc(size_t size) {
   if (startOfHeap == NULL) {
     startOfHeap = sbrk(0);
   }
-
   // Print out data about each metadata chunk:
-  // metadata_t *curMeta = startOfHeap;
-  // void *endOfHeap = sbrk(0);
+   metadata_t *curMeta = startOfHeap;
+   void *endOfHeap = sbrk(0);
   // printf("-- Start of Heap (%p) --\n", startOfHeap);
   // while ((void *)curMeta < endOfHeap) {   
   //   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
@@ -97,39 +96,109 @@ void *malloc(size_t size) {
   // }
   // printf("-- End of Heap (%p) --\n\n", endOfHeap);
 
-  metadata_t *meta = sbrk( sizeof(metadata_t) );
-  meta->size = size;
-  meta->isUsed = 1;
+  // metadata_t *meta = sbrk( sizeof(metadata_t) );
+  // meta->size = size;
+  // meta->isUsed = 1;
 
-  void *ptr = sbrk(size);
-  return ptr;
- //  return NULL;
+  // void *ptr = sbrk(size);
+  // return ptr;
+  // printf("-- Start of Heap (%p) --\n", startOfHeap);
+  // while ((void *)curMeta < endOfHeap) {
+  //   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  //   if(size <= curMeta->size + sizeof(metadata_t) && curMeta->isUsed == 0) { // free and big space
+  //     printf("Splitting \n");
+      
+  //     metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
+  //     printf("memory adress of new_block %p\n", new_block);
+  //     memcpy(new_block, curMeta, sizeof(metadata_t));
+  //     new_block->size = curMeta->size - sizeof(metadata_t) - size;
+  //     new_block->isUsed = 0;
+  //     curMeta->isUsed = 1;
+  //     curMeta->size = size;
+  //     return new_block;
+  //     // meta_data_t *new_block = sizeof(meta_data_t) + size //shift ptr up
+  //   }
+  //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  // }
+  void *ptr = split(size);
+  if(ptr == NULL) {
+    printf("Not splitting \n");
+    metadata_t *meta = sbrk( sizeof(metadata_t) );
+    meta->size = size;
+    meta->isUsed = 1;
+
+    void *ptr = sbrk(size);
+    return ptr;
+  }
+  //printf("-- End of Heap (%p) --\n\n", endOfHeap);
+  // metadata_t *meta = sbrk( sizeof(metadata_t) );
+  // meta->size = size;
+  // meta->isUsed = 1;
+
+  // void *ptr = sbrk(size);
+  // return ptr;
+
+   return NULL;
 }
 
-// void *split(size_t new_size) {
-//   if(new_size <= 0) {
-//     return NULL;
-//   }
-//   metadata_t *traverse_meta = startOfHeap;
-//   if(free_blocks > 0) { // free must have been called
-//     while(traverse_meta != NULL) {
-//       if(new_size <= traverse_meta->size && traverse_meta->isUsed == 0) { // free and big space
-//         meta_data_t *new_free_block = sizeof(meta_data_t) + size //shift ptr up
-//         new_block->size = traverse_meta->size - sizeof(meta_data_t) - new_size;
-//         new_block->isUsed = 0;
-//         new_block->next = traverse_meta;
-//         break;
+void *split(size_t size) {
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  printf("-- Start of Heap (%p) --\n", startOfHeap);
+  //printf("-- End of Heap (%p) --\n", endOfHeap);
+  while ((void *)curMeta < endOfHeap) {
+    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
+    if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
+      printf("Splitting \n");
+      
+      metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
+      printf("memory adress of new_block %p\n", new_block);
+      memcpy(new_block, curMeta, sizeof(metadata_t));
+      new_block->size = curMeta->size - sizeof(metadata_t) - size;
+      new_block->isUsed = 0;
+      curMeta->isUsed = 1;
+      curMeta->size = size;
+      return new_block;
+      // meta_data_t *new_block = sizeof(meta_data_t) + size //shift ptr up
+    }
+    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  }
+  return NULL;
+}
 
-//       }
-//       traverse_meta = traverse_meta->next;
-//     }
-//   } 
-// }
+
+
+
+
+void *split2(size_t new_size) {
+  if(new_size <= 0) {
+    return NULL;
+  }
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  //printf("%d\n", free_blocks);
+  //if(free_blocks > 0) { // free must have been called
+  while((void *)curMeta < endOfHeap) {
+    printf("Inside split function \n");
+    if(new_size <= curMeta->size && curMeta->isUsed == 0) { // free and big space
+      printf("Splitting \n");
+      metadata_t *new_block = curMeta + sizeof(metadata_t) + new_size;
+      memcpy(new_block, curMeta, sizeof(metadata_t));
+      new_block->size = curMeta->size - sizeof(metadata_t) - new_size;
+      new_block->isUsed = 0;
+      curMeta->isUsed = 1;
+      return new_block;
+      // meta_data_t *new_block = sizeof(meta_data_t) + size //shift ptr up
+    }
+    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  }
+ // } 
+  return NULL;
+}
 
 void print_heap(size_t size) {
-
   printf("Inside: malloc(%lu):\n", size);
-
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
   printf("-- Start of Heap (%p) --\n", startOfHeap);
