@@ -78,7 +78,7 @@ void *split(size_t new_size);
 
 void *malloc(size_t size) {
   // implement malloc
-  printf("Inside: malloc(%lu):\n", size);
+  //printf("Inside: malloc(%lu):\n", size);
   if(size == 0) {
     return NULL;
   }
@@ -122,7 +122,7 @@ void *malloc(size_t size) {
   // }
   void *ptr = split(size);
   if(ptr == NULL) {
-    printf("Not splitting \n");
+   // printf("Not splitting \n");
     metadata_t *meta = sbrk( sizeof(metadata_t) );
     meta->size = size;
     meta->isUsed = 1;
@@ -145,16 +145,16 @@ void *malloc(size_t size) {
 void *split(size_t size) {
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
-  printf("-- Start of Heap (%p) --\n", startOfHeap);
+ // printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
   while ((void *)curMeta < endOfHeap) {
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-    printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
+    // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    // printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
     if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
-      printf("Splitting \n");
+      //printf("Splitting \n");
       
       metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
-      printf("memory adress of new_block %p\n", new_block);
+      // printf("memory adress of new_block %p\n", new_block);
       memcpy(new_block, curMeta, sizeof(metadata_t));
       new_block->size = curMeta->size - sizeof(metadata_t) - size;
       new_block->isUsed = 0;
@@ -163,6 +163,7 @@ void *split(size_t size) {
       return new_block;
       // meta_data_t *new_block = sizeof(meta_data_t) + size //shift ptr up
     }
+    
     curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
   }
   return NULL;
