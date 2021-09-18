@@ -86,79 +86,34 @@ void *malloc(size_t size) {
   if (startOfHeap == NULL) {
     startOfHeap = sbrk(0);
   }
-  // Print out data about each metadata chunk:
-  //  metadata_t *curMeta = startOfHeap;
-  //  void *endOfHeap = sbrk(0);
-  // printf("-- Start of Heap (%p) --\n", startOfHeap);
-  // while ((void *)curMeta < endOfHeap) {   
-  //   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-  //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
-  // }
-  // printf("-- End of Heap (%p) --\n\n", endOfHeap);
-
-  // metadata_t *meta = sbrk( sizeof(metadata_t) );
-  // meta->size = size;
-  // meta->isUsed = 1;
-
-  // void *ptr = sbrk(size);
-  // return ptr;
   // printf("-- Start of Heap (%p) --\n", startOfHeap);
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
   //printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
- //printf("%d\n", size);
-  // while ((void *)curMeta < endOfHeap) {
-  //   // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-  //   // printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
-  //    if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
-  //     //printf("Splitting \n");
-  //     metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
-  //     memcpy(new_block, curMeta, sizeof(metadata_t));
-  //     new_block->size = curMeta->size - sizeof(metadata_t) - size;
-  //     new_block->isUsed = 0;
-  //     curMeta->isUsed = 1;
-  //     curMeta->size = size;
-  //     return new_block;
-
-  //   } else if(size <= curMeta->size && curMeta->isUsed == 0) {
-  //     //printf("Overiding current block size instead \n");
-  //     curMeta->isUsed = 1;
-  //     curMeta->size = size;
-  //     //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-  //     return curMeta;
-  //   }
-  //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
-  // } 
-
-  //void *ptr = split(size);
-  //if(ptr == NULL) {
+  combine();
+  void *ptr = split(size);
+  
+  //printf("did we get a ptr? : %p", ptr);
+  //printf("split returned %p", ptr);
+  if(ptr == NULL) {
+    //printf("this is called ----------------------\n");
     //printf("Not splitting but using sbrk \n");
     metadata_t *meta = sbrk( sizeof(metadata_t) );
     meta->size = size;
     meta->isUsed = 1;
     //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-    void *ptr = sbrk(size);
-    return ptr;
-  //}
-  //printf("-- End of Heap (%p) --\n\n", endOfHeap);
-  // metadata_t *meta = sbrk( sizeof(metadata_t) );
-  // meta->size = size;
-  // meta->isUsed = 1;
-
-  // void *ptr = sbrk(size);
-  // return ptr;
-
-   //printf(" LINE 141 \n");
-
-  // return ptr;
+    ptr = sbrk(size);
+  }
+  return ptr;
 }
 
 void *split(size_t size) {
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
-  //printf("-- Start of Heap (%p) --\n", startOfHeap);
-  //printf("-- End of Heap (%p) --\n", endOfHeap);
+  print_heap();
+  // printf("-- Start of Heap (%p) --\n", startOfHeap);
+  // printf("-- End of Heap (%p) --\n", endOfHeap);
  // printf("%d\n", size);
   while ((void *)curMeta < endOfHeap) {
     // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
@@ -171,45 +126,19 @@ void *split(size_t size) {
       new_block->isUsed = 0;
       curMeta->isUsed = 1;
       curMeta->size = size;
-      return new_block;
+      return (void *)new_block + sizeof(metadata_t);
 
     } else if(size <= curMeta->size && curMeta->isUsed == 0) {
       //printf("Overiding current block size instead \n");
       curMeta->isUsed = 1;
       curMeta->size = size;
-      return curMeta;
+      return (void *)curMeta + sizeof(metadata_t);
     }
     curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
   } 
   return NULL;
 }
 
-
-void *split2(size_t new_size) {
-  if(new_size <= 0) {
-    return NULL;
-  }
-  metadata_t *curMeta = startOfHeap;
-  void *endOfHeap = sbrk(0);
-  //printf("%d\n", free_blocks);
-  //if(free_blocks > 0) { // free must have been called
-  while((void *)curMeta < endOfHeap) {
-    printf("Inside split function \n");
-    if(new_size <= curMeta->size && curMeta->isUsed == 0) { // free and big space
-      printf("Splitting \n");
-      metadata_t *new_block = curMeta + sizeof(metadata_t) + new_size;
-      memcpy(new_block, curMeta, sizeof(metadata_t));
-      new_block->size = curMeta->size - sizeof(metadata_t) - new_size;
-      new_block->isUsed = 0;
-      curMeta->isUsed = 1;
-      return new_block;
-      // meta_data_t *new_block = sizeof(meta_data_t) + size //shift ptr up
-    }
-    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
-  }
- // } 
-  return NULL;
-}
 
 void print_heap() {
   //printf("Inside: malloc(%lu):\n", size);
@@ -222,6 +151,22 @@ void print_heap() {
   }
   printf("-- End of Heap (%p) --\n\n", endOfHeap);
 
+}
+
+void combine() {
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  while ((void *)curMeta < endOfHeap) {   
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    if(curMeta->isUsed == 0) {
+      metadata_t *secondMatch = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+      if((void *)secondMatch < endOfHeap && secondMatch->isUsed == 0) { // find second free block + in bounds
+        //printf("Combining next block that is free \n");
+        curMeta->size = curMeta->size + sizeof(metadata_t) + secondMatch->size;
+      }
+    }
+    curMeta = (void *)curMeta + sizeof(metadata_t) + curMeta->size; //check to see if points to the next right meta
+  }
 }
 
 /**
@@ -305,7 +250,7 @@ void *realloc(void *ptr, size_t size) {
     if(ptr == NULL ) {
       return malloc(size);
     }
-    
+    //printf("realloc called \n");
     void *block = ptr - sizeof(metadata_t);
     metadata_t *meta = (metadata_t *) block;
 
