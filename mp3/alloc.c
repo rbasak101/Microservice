@@ -91,7 +91,8 @@ void *malloc(size_t size) {
   void *endOfHeap = sbrk(0);
   //printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
-  combine();
+  //combine();
+  combine_properly();
   void *ptr = split(size);
   
   //printf("did we get a ptr? : %p", ptr);
@@ -151,6 +152,28 @@ void print_heap() {
   }
   //printf("-- End of Heap (%p) --\n\n", endOfHeap);
 
+}
+
+void combine_properly() {
+  metadata_t *curMeta = startOfHeap;
+  void *endOfHeap = sbrk(0);
+  unsigned int sizeTotal = 0;
+  int num_meta = 0;
+  while ((void *)curMeta < endOfHeap) {   
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    if(curMeta->isUsed == 0) {
+      metadata_t *secondMatch = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+      while((void *)secondMatch < endOfHeap) {
+        if(secondMatch->isUsed == 0) {
+           sizeTotal += secondMatch->size;
+           num_meta ++;
+        }
+        secondMatch = (void *)secondMatch + sizeof(metadata_t) + secondMatch->size;
+      }
+      curMeta->size = sizeTotal + num_meta * sizeof(metadata_t);
+    }
+    curMeta = (void *)curMeta + sizeof(metadata_t) + curMeta->size; //check to see if points to the next right meta
+  }
 }
 
 void combine() {
