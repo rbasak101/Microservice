@@ -144,12 +144,12 @@ void print_heap() {
   //printf("Inside: malloc(%lu):\n", size);
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
-  printf("-- Start of Heap (%p) --\n", startOfHeap);
+  //printf("-- Start of Heap (%p) --\n", startOfHeap);
   while ((void *)curMeta < endOfHeap) {   // While we're before the end of the heap...
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
   }
-  printf("-- End of Heap (%p) --\n\n", endOfHeap);
+  //printf("-- End of Heap (%p) --\n\n", endOfHeap);
 
 }
 
