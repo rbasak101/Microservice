@@ -89,7 +89,7 @@ void *malloc(size_t size) {
   // Print out data about each metadata chunk:
   //  metadata_t *curMeta = startOfHeap;
   //  void *endOfHeap = sbrk(0);
-   printf("-- Start of Heap (%p) --\n", startOfHeap);
+  // printf("-- Start of Heap (%p) --\n", startOfHeap);
   // while ((void *)curMeta < endOfHeap) {   
   //   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
   //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
@@ -107,41 +107,37 @@ void *malloc(size_t size) {
   void *endOfHeap = sbrk(0);
   //printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
-  printf("%d\n", size);
-  while ((void *)curMeta < endOfHeap) {
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-    printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
-    // if(curMeta->size - sizeof(metadata_t) <= size && size >= curMeta->size) {
-    //   curMeta->isUsed = 1;
-    //   curMeta->size = size;
-    // }
-     if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
-      printf("Splitting \n");
-      metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
-      memcpy(new_block, curMeta, sizeof(metadata_t));
-      new_block->size = curMeta->size - sizeof(metadata_t) - size;
-      new_block->isUsed = 0;
-      curMeta->isUsed = 1;
-      curMeta->size = size;
-      return new_block;
+ //printf("%d\n", size);
+  // while ((void *)curMeta < endOfHeap) {
+  //   // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  //   // printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
+  //    if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
+  //     //printf("Splitting \n");
+  //     metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
+  //     memcpy(new_block, curMeta, sizeof(metadata_t));
+  //     new_block->size = curMeta->size - sizeof(metadata_t) - size;
+  //     new_block->isUsed = 0;
+  //     curMeta->isUsed = 1;
+  //     curMeta->size = size;
+  //     return new_block;
 
-    } else if(size <= curMeta->size && curMeta->isUsed == 0) {
-      printf("Overiding current block size instead \n");
-      curMeta->isUsed = 1;
-      curMeta->size = size;
-      printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-      return curMeta;
-    }
-    curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
-  } 
+  //   } else if(size <= curMeta->size && curMeta->isUsed == 0) {
+  //     //printf("Overiding current block size instead \n");
+  //     curMeta->isUsed = 1;
+  //     curMeta->size = size;
+  //     //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  //     return curMeta;
+  //   }
+  //   curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
+  // } 
 
   //void *ptr = split(size);
   //if(ptr == NULL) {
-    printf("Not splitting but using sbrk \n");
+    //printf("Not splitting but using sbrk \n");
     metadata_t *meta = sbrk( sizeof(metadata_t) );
     meta->size = size;
     meta->isUsed = 1;
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     void *ptr = sbrk(size);
     return ptr;
   //}
@@ -163,16 +159,12 @@ void *split(size_t size) {
   void *endOfHeap = sbrk(0);
   //printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
-  printf("%d\n", size);
+ // printf("%d\n", size);
   while ((void *)curMeta < endOfHeap) {
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-    printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
-    // if(curMeta->size - sizeof(metadata_t) <= size && size >= curMeta->size) {
-    //   curMeta->isUsed = 1;
-    //   curMeta->size = size;
-    // }
+    // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    // printf("sumOfSizes %d \n", curMeta->size + sizeof(metadata_t));
      if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) { // free and big space
-      printf("Splitting \n");
+     // printf("Splitting \n");
       metadata_t *new_block = (void *)curMeta + sizeof(metadata_t) + size;
       memcpy(new_block, curMeta, sizeof(metadata_t));
       new_block->size = curMeta->size - sizeof(metadata_t) - size;
@@ -182,7 +174,7 @@ void *split(size_t size) {
       return new_block;
 
     } else if(size <= curMeta->size && curMeta->isUsed == 0) {
-      printf("Overiding current block size instead \n");
+      //printf("Overiding current block size instead \n");
       curMeta->isUsed = 1;
       curMeta->size = size;
       return curMeta;
