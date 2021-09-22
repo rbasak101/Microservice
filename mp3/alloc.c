@@ -6,15 +6,18 @@
 #include <string.h>
 #include <unistd.h>
 
-
-
 typedef struct _metadata_t {
   unsigned int size;     // The size of the memory block.
   unsigned char isUsed;  // 0 if the block is free; 1 if the block is used.
+
+  void *next_ptr; // for free lists ?
 } metadata_t;
 
+metadata_t *head = NULL;
+void *tail = NULL;
+void *startOfHeap = NULL;
 int free_blocks = 0;
-
+void *split(size_t new_size);
 /**
  * Allocate space for array in memory
  *
@@ -73,8 +76,6 @@ void *calloc(size_t num, size_t size) {
  *
  * @see http://www.cplusplus.com/reference/clibrary/cstdlib/malloc/
  */
-void *startOfHeap = NULL;
-void *split(size_t new_size);
 
 void *malloc(size_t size) {
   // implement malloc
@@ -91,8 +92,8 @@ void *malloc(size_t size) {
   void *endOfHeap = sbrk(0);
   //printf("-- Start of Heap (%p) --\n", startOfHeap);
   //printf("-- End of Heap (%p) --\n", endOfHeap);
-  //combine();
-  combine_properly();
+
+  combine_properly(); //here or in free ?????
   void *ptr = split(size);
   
   //printf("did we get a ptr? : %p", ptr);
@@ -192,6 +193,77 @@ void combine() {
   }
 }
 
+void free_list() {
+  metadata_t *curMeta = startOfHeap;
+  // printf("Inside free_list \n");
+  void *endOfHeap = sbrk(0);
+  // printf("curMeta addy %p\n", (void *)curMeta);
+  // printf("end %p\n", endOfHeap);
+  while ((void *)curMeta < endOfHeap) {    
+    //printf("Metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta+ sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    // printf("LINE 204 \n");
+    if(curMeta->isUsed == 0) {
+      //printf("Current Block is free, finding next one \n");
+      metadata_t *secondMatch = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+      while((void *)secondMatch < endOfHeap) {
+        if(secondMatch->isUsed == 0) {
+          //printf("Found another free block, setting next_ptr");
+          curMeta->next_ptr = secondMatch;
+          curMeta = secondMatch;
+          break;
+        } else {
+          secondMatch = (void *)secondMatch + sizeof(metadata_t) + secondMatch->size;
+        }
+      }
+    } else {
+      curMeta = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+    }
+  }
+  //curMeta->next_ptr = tail;
+}
+
+void free_list2(void *meta_ptr) {
+  metadata_t *curMeta = meta_ptr;
+  // printf("Inside free_list \n");
+  void *endOfHeap = sbrk(0);
+  // printf("curMeta addy %p\n", (void *)curMeta);
+  // printf("end %p\n", endOfHeap);
+  while ((void *)curMeta < endOfHeap) {    
+    //printf("Metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta+ sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    // printf("LINE 204 \n");
+    if(curMeta->isUsed == 0) {
+      //printf("Current Block is free, finding next one \n");
+      metadata_t *secondMatch = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+      while((void *)secondMatch < endOfHeap) {
+        if(secondMatch->isUsed == 0) {
+          //printf("Found another free block, setting next_ptr");
+          curMeta->next_ptr = secondMatch;
+          curMeta = secondMatch;
+          break;
+        } else {
+          secondMatch = (void *)secondMatch + sizeof(metadata_t) + secondMatch->size;
+        }
+      }
+    } else {
+      curMeta = (void *)curMeta + sizeof(metadata_t) + curMeta->size;
+    }
+  }
+  //curMeta->next_ptr = tail;
+}
+
+void free_list3(void *meta_ptr) {  // insert new encountered free block to the head of list
+  metadata_t *curMeta = meta_ptr;
+  // printf("Inside free_list \n");
+  if(curMeta->isUsed == 0){
+    if(head == NULL) { // empty list
+      head = curMeta;
+    } else {
+      curMeta->next_ptr = head;
+      head = curMeta;
+    }
+  }
+}
+
 /**
  * Deallocate space in memory
  *
@@ -216,6 +288,9 @@ void free(void *ptr) {
   metadata_t *meta = ptr - sizeof(metadata_t);
   meta->isUsed = 0;
   free_blocks += 1;
+
+  combine_properly(); // better in free or malloc?
+  free_list3(ptr); // adds to linked list
 }
 
 
