@@ -488,6 +488,7 @@ void free(void *ptr) {
  */
 void *realloc(void *ptr, size_t size) {
     // implement realloc:
+    
     if((size == 0) | (size == 0 && ptr != NULL)) {
       free(ptr);
       return NULL;
