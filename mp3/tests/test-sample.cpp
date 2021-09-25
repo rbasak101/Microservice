@@ -5,7 +5,7 @@
 #include "lib/catch.hpp"
 #include "lib/mstats-utils.h"
 
-// BASIC MEMORY ALLOCATOR
+//BASIC MEMORY ALLOCATOR
 TEST_CASE("`./mstats tests/samples_exe/sample1` test (allocation test)", "[weight=2][part=1]") {
   system("make -s");
   system("./mstats tests/samples_exe/sample1 evaluate");
@@ -98,14 +98,14 @@ TEST_CASE("sample4 - Memory Coalescing", "[weight=5][part=3]") {
 }
 
 // FREE LISTS
-TEST_CASE("sample6 - Free Lists", "[weight=5][part=4]") {
+TEST_CASE("sample6 - Free Lists", "[weight=5][part=4]") { // Failed
   system("make -s");
   system("./mstats tests/samples_exe/sample6 evaluate");
   mstats_result * result = read_mstats_result("mstats_result.txt");
   REQUIRE(result->status == 1);
   REQUIRE(result->max_heap_used < 3000000);
   REQUIRE(result->max_heap_used > 0);
-  REQUIRE(result->time_taken < 3);
+  REQUIRE(result->time_taken < 3); // fails here
   system("rm mstats_result.txt");
 }
 

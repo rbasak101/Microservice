@@ -14,6 +14,7 @@ mstats_result * read_mstats_result(const char *filename) {
 			&result->max_heap_used,
 			&result->avg_heap_used,
 			&result->time_taken);
+	
 	fclose(f);
 	return result;
 }
