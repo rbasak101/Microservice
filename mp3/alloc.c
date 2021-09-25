@@ -257,6 +257,7 @@ void print_list() {
   }
   printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
   printf("-- End of list (%p) --\n\n", curMeta);
+  printf("Helloooo");
   //print_heap();
 }
 

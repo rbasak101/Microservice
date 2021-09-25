@@ -17,7 +17,7 @@ TEST_CASE("tester1", "[weight=1][part=5][suite=week2]") {
 TEST_CASE("tester2", "[weight=1][part=5][suite=week2]") { // Failed
   system("make -s");
   system("./mstats tests/testers_exe/tester2 evaluate");
-  system("cat mstats_result.txt")
+  system("cat mstats_result.txt");
   mstats_result * result = read_mstats_result("mstats_result.txt");
   system("rm mstats_result.txt");
   REQUIRE(result->status == 1);
