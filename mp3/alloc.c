@@ -261,6 +261,7 @@ void print_list() {
   //print_heap();
 }
 
+
 void insert_front(metadata_t *meta_ptr) {  // insert new encountered free block to the head of list
   metadata_t *curMeta = meta_ptr;
   //printf("Inside insert_front \n");
