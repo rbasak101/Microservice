@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "wallet.h"
 pthread_cond_t cond;
 /**
@@ -11,8 +10,8 @@ void wallet_init(wallet_t *wallet) {
   // Implement
   //printf("hello \n");
   wallet->head = NULL;
-  //pthread_mutex_init(&(wallet->lock), NULL);
-  pthread_mutex_unlock(&(wallet->lock));
+  pthread_mutex_init(&(wallet->lock), NULL);
+  //pthread_mutex_unlock(&(wallet->lock));
   pthread_cond_init(&cond, NULL);
 }
 
