@@ -18,15 +18,16 @@ TEST_CASE("server -- loads `/`", "[weight=2][part=3]") {
   srand((unsigned) time(&t));
   int port = 10000 + (rand() % 40000);
   char cmd[100];
-  sprintf(cmd, "./server %d", port);
+  sprintf(cmd, "./server %d &", port);
 
   REQUIRE( system("make -s") == 0 );
 
   pthread_t server;
   pthread_create(&server, NULL, launch_server, (void *)cmd);
+  sleep(2);
 
   char curl[1000];
-  sprintf(curl, "curl -f http://localhost:%d/ >TEST_out.txt", port);
+  sprintf(curl, "curl --max-time 15 -f http://localhost:%d/ >TEST_out.txt", port);
 
   CAPTURE(curl);
   REQUIRE( system(curl) == 0 );
@@ -40,15 +41,16 @@ TEST_CASE("server -- loads `/240.png`", "[weight=3][part=3]") {
   srand((unsigned) time(&t));
   int port = 10000 + (rand() % 40000);
   char cmd[100];
-  sprintf(cmd, "./server %d", port);
+  sprintf(cmd, "./server %d &", port);
 
   REQUIRE( system("make -s") == 0 );
 
   pthread_t server;
   pthread_create(&server, NULL, launch_server, (void *)cmd);
+  sleep(2);
 
   char curl[1000];
-  sprintf(curl, "curl -f http://localhost:%d/240.png >TEST_out.png", port);
+  sprintf(curl, "curl --max-time 15 -f http://localhost:%d/240.png >TEST_out.png", port);
 
   CAPTURE(curl);
   REQUIRE( system(curl) == 0 );
@@ -62,15 +64,16 @@ TEST_CASE("server -- loads `/getaway.html`", "[weight=3][part=3]") {
   srand((unsigned) time(&t));
   int port = 10000 + (rand() % 40000);
   char cmd[100];
-  sprintf(cmd, "./server %d", port);
+  sprintf(cmd, "./server %d &", port);
 
   REQUIRE( system("make -s") == 0 );
 
   pthread_t server;
   pthread_create(&server, NULL, launch_server, (void *)cmd);
+  sleep(2);
 
   char curl[1000];
-  sprintf(curl, "curl -f http://localhost:%d/getaway.html >TEST_out.txt", port);
+  sprintf(curl, "curl --max-time 15 -f http://localhost:%d/getaway.html >TEST_out.txt", port);
 
   CAPTURE(curl);
   REQUIRE( system(curl) == 0 );
@@ -84,15 +87,16 @@ TEST_CASE("server -- fails `/not-found.html`", "[weight=2][part=3]") {
   srand((unsigned) time(&t));
   int port = 10000 + (rand() % 40000);
   char cmd[100];
-  sprintf(cmd, "./server %d", port);
+  sprintf(cmd, "./server %d &", port);
 
   REQUIRE( system("make -s") == 0 );
 
   pthread_t server;
   pthread_create(&server, NULL, launch_server, (void *)cmd);
+  sleep(2);
 
   char curl[1000];
-  sprintf(curl, "curl -f http://localhost:%d/not-found.html", port);
+  sprintf(curl, "curl --max-time 15 -f http://localhost:%d/not-found.html", port);
 
   CAPTURE(curl);
   REQUIRE( system(curl) != 0 );
