@@ -12,6 +12,11 @@ void *launch_server(void *vptr_cmd) {
   system(cmd);
 }
 
+void kill_server(int port) {
+  char cmd[100];
+  sprintf(cmd, "kill $(lsof -i:%d -t)", port);
+  system(cmd);
+}
 
 TEST_CASE("server -- loads `/`", "[weight=2][part=3]") {
   time_t t;
@@ -34,6 +39,7 @@ TEST_CASE("server -- loads `/`", "[weight=2][part=3]") {
   REQUIRE( system("diff TEST_out.txt static/index.html") == 0 );
 
   system("rm TEST_out.txt");
+  kill_server(port);
 }
 
 TEST_CASE("server -- loads `/240.png`", "[weight=3][part=3]") {
@@ -57,6 +63,7 @@ TEST_CASE("server -- loads `/240.png`", "[weight=3][part=3]") {
   REQUIRE( system("diff TEST_out.png static/240.png") == 0 );
 
   system("rm TEST_out.png");
+  kill_server(port);
 }
 
 TEST_CASE("server -- loads `/getaway.html`", "[weight=3][part=3]") {
@@ -80,6 +87,7 @@ TEST_CASE("server -- loads `/getaway.html`", "[weight=3][part=3]") {
   REQUIRE( system("diff TEST_out.txt static/getaway.html") == 0 );
 
   system("rm TEST_out.txt");
+  kill_server(port);
 }
 
 TEST_CASE("server -- fails `/not-found.html`", "[weight=2][part=3]") {
@@ -100,5 +108,7 @@ TEST_CASE("server -- fails `/not-found.html`", "[weight=2][part=3]") {
 
   CAPTURE(curl);
   REQUIRE( system(curl) != 0 );
+
+  kill_server(port);
 }
 
