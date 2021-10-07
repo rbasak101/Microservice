@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "http.h"
+
 char *token = NULL;
 int findNth(char* str, char ch, int N){
     int occur = 0;
@@ -16,16 +17,14 @@ int findNth(char* str, char ch, int N){
     }
     return -1;
 }
-
 void remove_spaces(char* s) {
-    char* d = s;
+    char *d = s;
     do {
         while (*d == ' ') {
             ++d;
         }
-    } while (*s++ = *d++); // stackoverflow
+    } while (*s++ = *d++); 
 }
-
 /**
  * httprequest_parse_headers
  * 
@@ -33,38 +32,44 @@ void remove_spaces(char* s) {
  */
 ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer_len) {
 
-  //int first_index = findNth(buffer, "/", 1);
-
-  // remove_spaces(buffer);
-  // char *token;
-  // char *rest = buffer;
-  // req->action = strtok(rest, "/");
-  // req->path = "/";
-  // printf("%s\n", req->path);
-  // req->version = strtok(NULL, "\r");
-  // printf("%s\n", req->version);
-
-  // char *token;
-  // char *rest = buffer;
-  // req->action = strtok(rest, " ");
-  // size_t length = strlen(req->action);
-  // req->path = strtok(NULL, " ");
-  // printf("%s\n", req->path);
-  // req->version = strtok(NULL, "\r");
-  // printf("%s\n", req->version);
-
-
-  char *rest = buffer;
+  char *rest = strdup(buffer);
   req->action = strtok_r(rest, " ", &token);
-  size_t length = strlen(req->action);
   req->path = strtok_r(NULL, " ", &token);
- // printf("%s\n", req->path);
-  req->version = strtok_r(NULL, "\r", &token);
-//  printf("%s\n", req->version);
+  
+  char *chunk = NULL;
+  chunk = strtok_r(NULL, "\r\n", &token);
+  req->version = chunk;
+  char *temp_key, *temp_val, *k, *v = NULL;
 
+  while(chunk != NULL) { // parsing key:values
+    chunk = strtok_r(NULL, "\r\n", &token);
+    if(chunk == NULL) {
+      break;
+    }
+
+    Node *item = malloc(sizeof(Node));  // populating k:v
+    k = strtok_r(chunk, ": ", &temp_key);
+
+    if(k == NULL) {
+      break;
+    }
+    item->key = k;
+   // printf("%s\n", item->key);
+    v = strtok_r(NULL, " ", &temp_key);
+    if(v == NULL) {
+      break;
+    }
+    item->value = v;
+   // printf("%s\n", item->value);
+    if(req->head == NULL) { // creating linked list
+      req->head = item;
+    } else {
+      item->next = req->head;
+      req->head = item;
+    }
+  }
   return -1;
 }
-
 
 /**
  * httprequest_read
@@ -92,17 +97,14 @@ const char *httprequest_get_action(HTTPRequest *req) {
  * Returns the value of the HTTP header `key` for a given `req`.
  */
 const char *httprequest_get_header(HTTPRequest *req, const char *key) {
-  char *decoy;
-  decoy = strtok_r(NULL, " ", &token);
-  printf("LINE 97 \n");
-  printf("%s\n", decoy);
-
-  char *answer;
-  answer = strtok_r(NULL, "\r", &token);
-  printf("LINE 97 \n");
-  printf("%s\n", answer);
-
-  return answer;
+  //traverse the linked list
+  Node *iterator;
+  for(iterator = req->head; iterator != NULL; iterator = iterator->next) {
+    if(strcmp(iterator->key, key) == 0){
+      return iterator->value;
+    }
+  }
+  return NULL;
 }
 
 
