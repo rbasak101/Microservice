@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+typedef struct Node_ {
+    char *key;
+    char *value;
+    struct Node_ *next;
+} Node;
 
 struct _HTTPRequest {
   const char *action;
@@ -17,6 +22,7 @@ struct _HTTPRequest {
   // ...however, you MUST keep the `action`, `path`, `version`, and `payload` members
   //    so our test cases can inspect the contents of them without making you write
   //    a bunch of getter functions. :)
+  Node *head;
 };
 typedef struct _HTTPRequest HTTPRequest;
 

@@ -112,10 +112,11 @@ TEST_CASE("Test Large Adds and Subtracts", "[weight=5][part=2]") {
   for (int i = (num_threads/2); i < num_threads; i++) {
     pthread_create(&tids[i], NULL, test_add_large, (void *) &wallet);
   }
+  //printf("LINE 115");
   for (int i = 0; i < num_threads; i++) {
     pthread_join(tids[i], NULL);
   }
-
+  //printf("LINE 119");
   int num_potatoes = wallet_get(&wallet, "potatoes");
   REQUIRE(num_potatoes == (100000 * (num_threads/2)));
 

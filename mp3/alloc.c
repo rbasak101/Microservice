@@ -107,7 +107,8 @@ void *malloc(size_t size) {
     //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     ptr = sbrk(size);
   }
-  //print_heap();
+  print_heap();
+  //print_list();
   return ptr;
 }
 
@@ -166,6 +167,7 @@ void *split_lists(size_t size) {
       curMeta = curMeta->prev_ptr;
       curMeta->next_ptr = temp;
       curMeta = curMeta->prev_ptr;
+      printf("fk u big boi");
       curMeta->next_ptr = NULL;
       return (void *)curMeta + sizeof(metadata_t);
     }
@@ -176,9 +178,14 @@ void *split_lists(size_t size) {
 
 void *split_lists2(size_t size) {
   metadata_t *curMeta = head;
+  if(head != NULL) {
+    print_list();
+  }
   for(curMeta = head; curMeta != NULL; curMeta = curMeta->next_ptr) {
-
+    printf("size: %d \n", size);
+    printf("size of meta: %d \n", curMeta->size);
     if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) {
+      printf("splitting\n");
       metadata_t *newMeta = (void *)curMeta + size + sizeof(metadata_t);
       memcpy(newMeta, curMeta, sizeof(metadata_t));
       newMeta->size = curMeta->size - size - sizeof(metadata_t);
@@ -201,9 +208,8 @@ void *split_lists2(size_t size) {
       }
       return (void*)curMeta +sizeof(metadata_t);
     } else if (size <= curMeta->size && curMeta->isUsed == 0) {
-      // printf("Overiding current block size instead \n");
+      printf("Overiding current block size instead \n");
       curMeta->isUsed = 1;
-      curMeta->size = size;
       metadata_t *temp = curMeta->next_ptr;
       if(curMeta->prev_ptr != NULL) {
         metadata_t * t = curMeta->prev_ptr;
@@ -224,6 +230,7 @@ void *split_lists2(size_t size) {
       return (void*) curMeta + sizeof(metadata_t); // curMeta is referring to block no longer in list
     }
   } 
+  //printf("allocating new memory \n");
   return NULL;
 }
 
@@ -283,15 +290,24 @@ void insert_front(metadata_t *meta_ptr) {  // insert new encountered free block 
 
 void insert_behind(metadata_t *meta_ptr) {  // insert new encountered free block to the head of list
   metadata_t *curMeta = meta_ptr;
-  if(head == NULL) { // empty list
-    head = curMeta;
-    tail = curMeta;
-   // printf("First element in list \n");
-  } else {
-    tail->next_ptr = curMeta;
-    curMeta->prev_ptr = tail; 
-    tail = curMeta;
+  if(curMeta->isUsed == 0) {
+    if(head == NULL) { // empty list
+      head = curMeta;
+     printf("First element in list \n");
+     printf("head->next_ptr : %p\n", head->next_ptr);
+    } else if(tail == NULL) {
+      tail = curMeta;
+      head->next_ptr = tail;
+      tail->prev_ptr = head;
+      printf("second element in list \n");
+      printf("head: %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
+    } else {
+      curMeta->prev_ptr = tail; 
+      tail->next_ptr = curMeta;
+      tail = curMeta;
+      printf("head : %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
     }
+  }
   
   // printf("metadata for next_ptr memory %p :\n ", curMeta->next_ptr);
   // printf("metadata for prev_ptr memory %p : \n", curMeta->prev_ptr);
@@ -438,7 +454,8 @@ void free(void *ptr) {
 
   //combine_properly(); // better in free or malloc?
   //free_list3(ptr); // adds to linked list
-  insert_front(meta);
+  //printf("called\n");
+  insert_behind(meta);
   memory_coalesce();
 }
 

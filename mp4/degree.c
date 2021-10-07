@@ -142,7 +142,8 @@ int main() {
   pthread_create(&tids[8], NULL, job_orchard, &wallet);
   const int totalJobs = 9;
 
-  for (int i = 0; i < totalJobs; i++) {
+  int i = 0;
+  for (i = 0; i < totalJobs; i++) {
     pthread_join(tids[i], NULL);
   }
   fprintf(stderr, "\n");
