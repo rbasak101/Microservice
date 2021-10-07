@@ -167,7 +167,6 @@ void *split_lists(size_t size) {
       curMeta = curMeta->prev_ptr;
       curMeta->next_ptr = temp;
       curMeta = curMeta->prev_ptr;
-      printf("fk u big boi");
       curMeta->next_ptr = NULL;
       return (void *)curMeta + sizeof(metadata_t);
     }
@@ -182,10 +181,10 @@ void *split_lists2(size_t size) {
     print_list();
   }
   for(curMeta = head; curMeta != NULL; curMeta = curMeta->next_ptr) {
-    printf("size: %d \n", size);
-    printf("size of meta: %d \n", curMeta->size);
+    // printf("size: %d \n", size);
+    // printf("size of meta: %d \n", curMeta->size);
     if(size + sizeof(metadata_t) <= curMeta->size && curMeta->isUsed == 0) {
-      printf("splitting\n");
+      // printf("splitting\n");
       metadata_t *newMeta = (void *)curMeta + size + sizeof(metadata_t);
       memcpy(newMeta, curMeta, sizeof(metadata_t));
       newMeta->size = curMeta->size - size - sizeof(metadata_t);
@@ -208,7 +207,7 @@ void *split_lists2(size_t size) {
       }
       return (void*)curMeta +sizeof(metadata_t);
     } else if (size <= curMeta->size && curMeta->isUsed == 0) {
-      printf("Overiding current block size instead \n");
+      // printf("Overiding current block size instead \n");
       curMeta->isUsed = 1;
       metadata_t *temp = curMeta->next_ptr;
       if(curMeta->prev_ptr != NULL) {
@@ -238,33 +237,33 @@ void print_heap() {
   //printf("Inside: malloc(%lu):\n", size);
   metadata_t *curMeta = startOfHeap;
   void *endOfHeap = sbrk(0);
-  printf("-- Start of Heap (%p) --\n", startOfHeap);
+ // printf("-- Start of Heap (%p) --\n", startOfHeap);
   while ((void *)curMeta < endOfHeap) {   // While we're before the end of the heap...
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     curMeta = (void *)curMeta + curMeta->size + sizeof(metadata_t);
   }
-  printf("-- End of Heap (%p) --\n\n", endOfHeap);
+  //printf("-- End of Heap (%p) --\n\n", endOfHeap);
 }
 
 void print_list() {
   metadata_t *curMeta = head;
   void *endOfHeap = sbrk(0);
-  printf("-- Start of list (%p) --\n", head);
+  //printf("-- Start of list (%p) --\n", head);
   // printf("curMeta addy %p\n", (void *)curMeta);
   while (curMeta->next_ptr != NULL) {   // While we're before the end of the heap...
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+   // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     curMeta = curMeta->next_ptr;
   }
-  printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-  printf("-- End of list (%p) --\n\n", curMeta);
-  printf("Backwards traversal: \n");
+  // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  // printf("-- End of list (%p) --\n\n", curMeta);
+  // printf("Backwards traversal: \n");
   while (curMeta->prev_ptr != NULL) {   // While we're before the end of the heap...
-    printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+    //printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
     curMeta = curMeta->prev_ptr;
   }
-  printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
-  printf("-- End of list (%p) --\n\n", curMeta);
-  printf("Helloooo");
+  // printf("metadata for memory %p: (%p, size=%d, isUsed=%d)\n", (void *)curMeta + sizeof(metadata_t), curMeta, curMeta->size, curMeta->isUsed);
+  // printf("-- End of list (%p) --\n\n", curMeta);
+  // printf("Helloooo");
   //print_heap();
 }
 
@@ -293,19 +292,19 @@ void insert_behind(metadata_t *meta_ptr) {  // insert new encountered free block
   if(curMeta->isUsed == 0) {
     if(head == NULL) { // empty list
       head = curMeta;
-     printf("First element in list \n");
-     printf("head->next_ptr : %p\n", head->next_ptr);
+    //  printf("First element in list \n");
+    //  printf("head->next_ptr : %p\n", head->next_ptr);
     } else if(tail == NULL) {
       tail = curMeta;
       head->next_ptr = tail;
       tail->prev_ptr = head;
-      printf("second element in list \n");
-      printf("head: %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
+      // printf("second element in list \n");
+      // printf("head: %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
     } else {
       curMeta->prev_ptr = tail; 
       tail->next_ptr = curMeta;
       tail = curMeta;
-      printf("head : %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
+      //printf("head : %p head->next_ptr : %p tail: %p tail->next_ptr : %p \n", head, head->next_ptr, tail, tail->next_ptr);
     }
   }
   

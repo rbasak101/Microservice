@@ -32,13 +32,19 @@ void remove_spaces(char* s) {
  */
 ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer_len) {
 
+  size_t size = 0;
   char *rest = strdup(buffer);
   req->action = strtok_r(rest, " ", &token);
+
+  size += strlen(req->action);
+
   req->path = strtok_r(NULL, " ", &token);
-  
+  size += strlen(req->path);
+
   char *chunk = NULL;
   chunk = strtok_r(NULL, "\r\n", &token);
   req->version = chunk;
+  size += strlen(req->version);
   char *temp_key, *temp_val, *k, *v = NULL;
 
   while(chunk != NULL) { // parsing key:values
@@ -46,7 +52,7 @@ ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer
     if(chunk == NULL) {
       break;
     }
-
+    size += strlen(chunk);
     Node *item = malloc(sizeof(Node));  // populating k:v
     k = strtok_r(chunk, ": ", &temp_key);
 
@@ -54,13 +60,16 @@ ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer
       break;
     }
     item->key = k;
-   // printf("%s\n", item->key);
+    printf("item->key: ");
+    printf("%s\n", item->key);
     v = strtok_r(NULL, " ", &temp_key);
     if(v == NULL) {
-      break;
+      item->value = "payload";
+    } else {
+      item->value = v;
     }
-    item->value = v;
-   // printf("%s\n", item->value);
+    printf("item->value: ");
+    printf("%s\n", item->value);
     if(req->head == NULL) { // creating linked list
       req->head = item;
     } else {
@@ -68,7 +77,7 @@ ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer
       req->head = item;
     }
   }
-  return -1;
+  return size;
 }
 
 /**
@@ -77,7 +86,27 @@ ssize_t httprequest_parse_headers(HTTPRequest *req, char *buffer, ssize_t buffer
  * Populate a `req` from the socket `sockfd`, returning the number of bytes read to populate `req`.
  */
 ssize_t httprequest_read(HTTPRequest *req, int sockfd) {
-  return -1;
+  char buffer[4096];
+  ssize_t len = read(sockfd, buffer, 4096);
+  buffer[len] = '\0';
+  ssize_t read = 0;
+  read += httprequest_parse_headers(req, buffer,len); // headers, action, path, version; need payload
+  // payload is stored in linked list; key: 0123456789, value: "payload"
+  // Node *iterator;
+  // Node *last;
+  // for(iterator = req->head; iterator != NULL; iterator = iterator->next) {
+  //   printf("%s\n", iterator->key);
+  //   // if(iterator->next == NULL) {
+  //   //   last = iterator;
+  //   // }
+  // }
+  if(strcmp(req->head->value, "payload") == 0) {
+    req->payload = req->head->key;
+  } else {
+    req->payload = NULL;
+  }
+  // req->payload = last->key;
+  return read;
 }
 
 
