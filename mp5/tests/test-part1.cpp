@@ -23,7 +23,8 @@ HTTPRequest *_parse(const char *s) {
 
 
 TEST_CASE("httprequest_parse_headers - Request Line", "[weight=2][part=1]") {
-  HTTPRequest *req = _parse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+  //HTTPRequest *req = _parse("GET / HTTP/1.1\r\nHost: localhost\r\n\r\n");
+  HTTPRequest *req = _parse("GET / HTTP/1.1\r\nHello: World\r\nHost: 127.0.0.1\r\nContent-Length: 10\r\n\r\n0123456789");
 
   REQUIRE( req->action != NULL );
   CHECK( strcmp(req->action, "GET") == 0 );

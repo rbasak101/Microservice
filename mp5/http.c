@@ -148,7 +148,6 @@ ssize_t httprequest_parse_headers2(HTTPRequest *req, char *buffer, ssize_t buffe
       item->next = req->head;
       req->head = item;
     }
-    printf("\n");
   }
   return size;
 }

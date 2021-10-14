@@ -81,7 +81,6 @@ TEST_CASE("httprequest_read - Content-Length Header", "[weight=1][part=2]") {
   CHECK( strcmp(content_length, "10") == 0 );
 }
 
-
 TEST_CASE("httprequest_read - No Content-Length results in a NULL payload", "[weight=2][part=2]") {
   HTTPRequest *req = _readpipe("GET / HTTP/1.1\r\nHello: World\r\nHost: 127.0.0.1\r\n\r\n");
 
