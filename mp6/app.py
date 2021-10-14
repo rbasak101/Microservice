@@ -1,4 +1,5 @@
 from flask import Flask
+import os, sys
 app = Flask(__name__)
 
 # Route for "/" for a web-based interface to this micro-service:
@@ -13,3 +14,27 @@ def extract_hidden_gif():
   from flask import send_file, request
 
   # ...your code here...
+
+  # dir = os.path.join(app.instance_path, "temp")
+
+  os.system("rm -r ./temp") 
+  os.makedirs("./temp", mode=511, exist_ok=True)
+  file = request.files["png"]
+  print(file)
+  #print("type is.. ")
+  type = file.filename.split('.')[1]
+  #print(type)
+  if file and type == "png": # succesfully obtained file and check for file type
+    file.save("./temp/file.png")
+    path = "./png-extractGIF ./temp/file.png ./temp/hidden.gif"
+    exit_value = os.system(path)
+    print(exit_value)
+    if exit_value != 0:
+      return "Gif not present", 500
+    else:
+      return send_file("./temp/hidden.gif", as_attachment = False)
+  else:
+    return "PNG not submitted", 500
+    
+#edge case: no file but submitted
+

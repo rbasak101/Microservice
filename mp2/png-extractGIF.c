@@ -39,7 +39,8 @@ int png_extractGIF(const char *png_filename, const char *gif_filename) {
         // printf("%d\n", written);
         // printf("%d\n", 36);
       }
-      break;  
+      //break;  
+      return 0; // Change the to a zero to indicate success, when your implementaiton is complete.
     }
 
     if(strcmp(chunk.type, "IEND") == 0 ) {
@@ -47,7 +48,7 @@ int png_extractGIF(const char *png_filename, const char *gif_filename) {
       break;
     }
   }
-  return 0;  // Change the to a zero to indicate success, when your implementaiton is complete.
+  return 1;  // No gif
 }
 
 

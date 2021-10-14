@@ -9,7 +9,54 @@
 
 void *client_thread(void *vptr) {
   int fd = *((int *)vptr);
+  HTTPRequest *req = malloc(sizeof(HTTPRequest));
+  ssize_t read = httprequest_read(req, fd);
+  printf("LINE 20 \n");
+  printf("read: %u \n", read);
+  // if(read <= 0) {
+  //   printf("here\n");
+  //   fclose(fd);
+  //   return NULL;
+  // }
+  printf("path: %s\n", req->path);
+  // if(strcmp(req->path, "/") == 0) {
+  //   req->path = "/index.html";
+  // }
+  //printf("here\n");
+  
+  //char static_path = malloc(strlen(req->path) + 10);
+  char content = "text/html";
+  if(strstr(req->path, ".png") != NULL) {
+    content = "image/png";
+  }
+  // if file does not exist, return 404 error else return 200 ok + others
+  FILE *file;
+  char fullPath[1024];
+  sprintf(fullPath, "static%s", req->path);
+  file = fopen(fullPath, "r");
+  if(file == NULL) {
+    printf("http/1.1 404 Not Found \n");
+  } else {
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    fseek(file, 0L, SEEK_SET);
+    void *ptr = malloc(size);
+    fread(ptr, size, 1, file);
+    fclose(file);
+    printf("200 OK \n");
+    //char response = "http/1.1: 200 OK Content-Type %s";
+    char response [1024];
+    sprintf(response, "http/1.1: 200 OK \r\n Content-Type %d \r\n Content-Length %d \r\n\r\n %s", content, size, req->head->key);
+    // payload
+    printf("%s\n", "LINE 52");
+    printf("%s\n", response);
+    printf(req->head->key);
+    printf("Done");
+    write(fd, response , strlen(response));
+    //fclose(fd);
 
+  }
+  fclose(fd);
   return NULL;
 }
 
