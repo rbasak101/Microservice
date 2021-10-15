@@ -21,9 +21,9 @@ def extract_hidden_gif():
   os.makedirs("./temp", mode=511, exist_ok=True)
   file = request.files["png"]
   print(file)
-  #print("type is.. ")
+  print("type is.. ")
   type = file.filename.split('.')[1]
-  #print(type)
+  print(type)
   if file and type == "png": # succesfully obtained file and check for file type
     file.save("./temp/file.png")
     path = "./png-extractGIF ./temp/file.png ./temp/hidden.gif"
@@ -38,3 +38,5 @@ def extract_hidden_gif():
     
 #edge case: no file but submitted
 
+if __name__ == '__main__':
+   app.run(host='0.0.0.0',port=5000)
