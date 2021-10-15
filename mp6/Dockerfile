@@ -35,10 +35,12 @@ MAINTAINER basak4@illinois.edu
 COPY ./mp2 /mp2
 COPY ./mp6 /mp6
 WORKDIR /mp6
+
 RUN pip3 install -r requirements.txt
+
+ENV FLASK_RUN_HOST=0.0.0.0
 EXPOSE 5000
 
-# ENV FLASK_RUN_HOST=0.0.0.0
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+CMD ["python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 
