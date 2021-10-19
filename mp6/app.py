@@ -29,7 +29,7 @@ def extract_hidden_gif():
     os.system("make") # essential!
     path = "./png-extractGIF ./temp/file.png ./temp/hidden.gif"
     exit_value = os.system(path)
-    print(exit_value)
+    #print(exit_value)
     if exit_value != 0:
       return "Gif not present", 500
     else:
