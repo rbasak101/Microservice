@@ -13,7 +13,7 @@ def add(key):
         dictionary[key] = {}
     version = len(dictionary[key]) + 1
     dictionary[key][version] = value
-    print(dictionary)
+    # print(dictionary)
     return "Added", 200
 
 # #GET /<key> – Retrieves the latest version of a key
@@ -45,5 +45,5 @@ def delete(key):
     if key not in dictionary:
         return "Key not present", 404
     del dictionary[key]
-    print(dictionary)
+    # print(dictionary)
     return "Deleted", 200
