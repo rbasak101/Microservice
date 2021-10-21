@@ -17,45 +17,48 @@ def add(key):
                  "version": collection.count() + 1
                 }
     collection.insert_one(document)
-    #entries += 1
-    cursor = collection.find()
-    for record in cursor:
-        print(record)
-
+    # cursor = collection.find()
+    # for record in cursor:
+    #     print(record)
     print(db.list_collection_names())
     return "Added\n", 200
 
 # GET /<key> – Retrieves the latest version of a key
 @app.route("/<key>", methods=["GET"])
 def retrieve_latest(key): 
-    print("finding key")
     collection = db[key]
     result = collection.find_one({"version": collection.count()})
-    print(result)
-    print(type(result))
+    # print(result) 
+    # print(type(result))
+    if type(result) is not dict:
+        return "Key is not present\n", 404
     return "sucessfully retrieved\n", 200    # fix conclusion + edge?
-
     
 # GET /<key>/<version> – Retrieves a specific version of a key
 @app.route("/<key>/<version>", methods=["GET"])
 def specific_retrieve(key, version):
-    print("finding key")
     collection = db[key]
     result = collection.find_one({"version": int(version)})
-    print(result)
-    print(type(result))
+    # print(result)
+    # print(type(result))
+    if type(result) is not dict:
+        return "Key and/or version is not present\n", 404
     return "sucessfully retrieved\n", 200    # fix conclusion + edge?
 
 # DELETE /<key> – Completely deletes a key
 @app.route("/<key>", methods=["DELETE"])
 def delete(key):
+    orig_total = 0
+    for database in db.list_collection_names():
+        orig_total += 1
+    
+    # print(orig_total)
     collection = db[key]
     collection.drop() #takes care of edge cases
-    print(db.list_collection_names())
+    # print(db.list_collection_names())
 
-    return "Deleted\n", 200
-
-    # if deleted:
-    #     return "Deleted all keys\n", 200
-    # else:
-    #     return "Key not present\n"
+    # print(len(db.list_collection_names()))
+    # print
+    if orig_total - 1 == len(db.list_collection_names()):
+        return "Deleted\n", 404
+    return "Key is not present\n", 200
