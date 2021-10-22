@@ -18,7 +18,7 @@
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit'
         })
 
-        let forecastDate = new Date(Date.parse(data.nextCourseMeeting));
+        let forecastDate = new Date(Date.parse(data.forecastTime));
         let forecastDateStr = forecastDate.toLocaleString('en-US', {
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit'
         })        
