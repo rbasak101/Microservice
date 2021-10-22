@@ -20,7 +20,7 @@ def add(key):
 @app.route("/<key>", methods=["GET"])
 def retrieve_latest(key): 
     if len(dictionary) == 0:
-        return "Empty", 404
+        return "Empty", 4041
     if key not in dictionary:
         return "Key not present", 404
     #max_key = max(dictionary, key = dictionary.get)

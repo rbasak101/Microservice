@@ -29,21 +29,26 @@ def retrieve_latest(key):
     collection = db[key]
     result = collection.find_one({"version": collection.count()})
     # print(result) 
-    # print(type(result))
+    parsed_result = collection.find_one({"version": collection.count()}, {'_id': 0, 'value': 1})
+    print(parsed_result)
+    print(type(parsed_result))
     if type(result) is not dict:
         return "Key is not present\n", 404
-    return "sucessfully retrieved\n", 200    # fix conclusion + edge?
+    #return "sucessfully retrieved\n", 200    # fix conclusion 
+    return jsonify({"value" : parsed_result['value'], "version" : collection.count()}), 200
     
 # GET /<key>/<version> – Retrieves a specific version of a key
 @app.route("/<key>/<version>", methods=["GET"])
 def specific_retrieve(key, version):
     collection = db[key]
     result = collection.find_one({"version": int(version)})
-    # print(result)
-    # print(type(result))
+    print(result)
+    parsed_result = collection.find_one({"version": int(version)}, {'_id': 0, 'value': 1})
+    print(parsed_result)
     if type(result) is not dict:
         return "Key and/or version is not present\n", 404
-    return "sucessfully retrieved\n", 200    # fix conclusion + edge?
+    #return "sucessfully retrieved\n", 200    # fix conclusion
+    return jsonify({"value" : parsed_result['value'], "version" : int(version)}), 200
 
 # DELETE /<key> – Completely deletes a key
 @app.route("/<key>", methods=["DELETE"])
