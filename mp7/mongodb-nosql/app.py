@@ -20,7 +20,7 @@ def add(key):
     # cursor = collection.find()
     # for record in cursor:
     #     print(record)
-    print(db.list_collection_names())
+    # print(db.list_collection_names())
     return "Added\n", 200
 
 # GET /<key> – Retrieves the latest version of a key
@@ -30,8 +30,8 @@ def retrieve_latest(key):
     result = collection.find_one({"version": collection.count()})
     # print(result) 
     parsed_result = collection.find_one({"version": collection.count()}, {'_id': 0, 'value': 1})
-    print(parsed_result)
-    print(type(parsed_result))
+    # print(parsed_result)
+    # print(type(parsed_result))
     if type(result) is not dict:
         return "Key is not present\n", 404
     #return "sucessfully retrieved\n", 200    # fix conclusion 
@@ -42,9 +42,9 @@ def retrieve_latest(key):
 def specific_retrieve(key, version):
     collection = db[key]
     result = collection.find_one({"version": int(version)})
-    print(result)
+    # print(result)
     parsed_result = collection.find_one({"version": int(version)}, {'_id': 0, 'value': 1})
-    print(parsed_result)
+    # print(parsed_result)
     if type(result) is not dict:
         return "Key and/or version is not present\n", 404
     #return "sucessfully retrieved\n", 200    # fix conclusion
