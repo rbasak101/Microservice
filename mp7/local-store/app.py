@@ -13,7 +13,7 @@ def add(key):
         dictionary[key] = {}
     version = len(dictionary[key]) + 1
     dictionary[key][version] = value
-    # print(dictionary)
+    #print(dictionary)
     return "Added", 200
 
 # #GET /<key> – Retrieves the latest version of a key
@@ -31,9 +31,9 @@ def retrieve_latest(key):
 def specific_retrieve(key, version):
     if key not in dictionary:
         return "Key not present", 404
-    print("printing version number right now...")
-    print(version)
-    print(type(version)) #version is a string
+    # print("printing version number right now...")
+    # print(version)
+    #print(type(version)) #version is a string
     if(int(version) > len(dictionary[key]) or int(version) < 1):
         return "version is out of bounds", 404
     return jsonify({"value": dictionary[key][int(version)], "version" : version }), 200
@@ -45,5 +45,5 @@ def delete(key):
     if key not in dictionary:
         return "Key not present", 404
     del dictionary[key]
-    # print(dictionary)
+    #print(dictionary)
     return "Deleted", 200
