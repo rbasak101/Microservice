@@ -24,7 +24,7 @@ app = Flask(__name__)
 @app.route('/<subject>/<number>/')
 def GET_subject_number(subject, number):
   # Prep result:
-  result = { "coruse": f"{subject} {number}" }
+  result = { "course": f"{subject} {number}" }
 
   # Cast `number` as an int and ensure `subject` is all caps:
   try:
