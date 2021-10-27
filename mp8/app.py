@@ -70,7 +70,7 @@ def POST_weather():
   print(course_time < current_time)
   print(current_weekday)
 
-  # #finding next day of class
+  # #finding next day of class 
   next_week = False
   for i in range(current_weekday, current_weekday + 7):
     current = i % 7
