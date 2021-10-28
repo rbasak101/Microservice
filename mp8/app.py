@@ -49,8 +49,12 @@ def POST_weather():
       elif day == "F":
         list_meeting[4] = 1
   except:
+    print("EXCEPT")
     print(course_data["error"])
-    return course_data["error"], 404
+    print(course_data["course"])
+    #return course_data["error"], 404
+    return jsonify({"course": course_data["course"],  
+                    "error": course_data["error"]}), 404
 
   print(list_meeting)
   course_time = course_data["Start Time"]
@@ -60,7 +64,7 @@ def POST_weather():
   course_time = datetime.strptime(course_time_stats[0], "%H:%M")
   course_time = course_time.time()
 
-  if course_time_stats[1] == "PM":
+  if course_time_stats[1] == "PM" and "12" not in str(course_time_stats[0]):
     print("afternoon")
     #Creating datetime object in order to convert regular to army time
     dt = datetime(2021, 1, 10)
@@ -86,6 +90,7 @@ def POST_weather():
   next_week = False
   for i in range(current_weekday, current_weekday + 7):
     current = i % 7
+    print(i, current)
     if i == 6:
       next_week = True
     if list_meeting[current] == 1:
@@ -95,7 +100,7 @@ def POST_weather():
           print("next meeting time:", current)
           print(current)
           break
-      elif current_weekday < current:
+      elif current_weekday < i: #changed current to i
           print("next meeting time:", current)
           print(current)
           break
@@ -135,8 +140,5 @@ def POST_weather():
                   "forecastTime": forecastTime,
                   "temperature": temperature,
                   "shortForecast": shortForecast}), 200
-
-
-
 
 
