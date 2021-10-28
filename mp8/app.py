@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import requests
-from datetime import datetime, timedelta, time
+from datetime import timedelta, time, datetime
 from itertools import islice
 import re
 
@@ -55,9 +55,21 @@ def POST_weather():
   print(list_meeting)
   course_time = course_data["Start Time"]
   print("start time is: ")
-  course_time = course_time.split()
-  course_time = datetime.strptime(course_time[0], "%H:%M")
+  print(course_time.split())
+  course_time_stats = course_time.split()
+  course_time = datetime.strptime(course_time_stats[0], "%H:%M")
   course_time = course_time.time()
+
+  if course_time_stats[1] == "PM":
+    print("afternoon")
+    #Creating datetime object in order to convert regular to army time
+    dt = datetime(2021, 1, 10)
+    combined = dt.combine(dt, course_time)
+    print(combined)
+    course_time_temp = combined + timedelta(hours = 12)
+    course_time =course_time_temp.time()
+    print(course_time)
+    
   print(course_time, type(course_time))
 
   current_datetime = datetime.now()
@@ -65,10 +77,10 @@ def POST_weather():
   current_time = current_datetime.time()
   current_weekday = current_datetime.weekday()
   
-  print(current_date)
-  print(current_time)
-  print(course_time < current_time)
-  print(current_weekday)
+  # print(current_date)
+  # print(current_time)
+  # print(course_time < current_time)
+  # print(current_weekday)
 
   # #finding next day of class 
   next_week = False
@@ -94,8 +106,8 @@ def POST_weather():
     next_course_date = next_course_date + timedelta(7)
   print(next_course_date)
   nextCourseMeeting = str(next_course_date) + " " +str(course_time)
-  print(course)
-  print(nextCourseMeeting)
+  # print(course)
+  # print(nextCourseMeeting)
 
  # Weather API              https://api.weather.gov/gridpoints/ILX/95,71/forecast/hourly
   w = requests.get("https://api.weather.gov/gridpoints/ILX/95,71/forecast/hourly")
@@ -103,7 +115,7 @@ def POST_weather():
   properties_list = weather_data["properties"]["periods"]
 
   print(course_time)
-  weather_course_time = course_time.replace(microsecond=0, second=0, minute=0)
+  weather_course_time = course_time.replace(microsecond=0, second=0, minute=0) #round down the time
   print(weather_course_time)
 
   temperature = -1
@@ -113,11 +125,10 @@ def POST_weather():
       print(properties["startTime"], properties["temperature"], properties["shortForecast"])
       temperature = int(properties["temperature"])
       shortForecast = str(properties["shortForecast"])
-      print("temperature is:", temperature)
-      print("forecast:", shortForecast)
+      # print("temperature is:", temperature)
+      # print("forecast:", shortForecast)
 
   forecastTime = str(next_course_date) + " " + str(weather_course_time)
-  print(forecastTime)
 
   return jsonify({"course": course,  #check if needed to display on frontend
                   "nextCourseMeeting": nextCourseMeeting, 
