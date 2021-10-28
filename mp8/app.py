@@ -52,9 +52,7 @@ def POST_weather():
     print("EXCEPT")
     print(course_data["error"])
     print(course_data["course"])
-    #return course_data["error"], 404
-    return jsonify({"course": course_data["course"],  
-                    "error": course_data["error"]}), 404
+    return course_data["error"], 404
 
   print(list_meeting)
   course_time = course_data["Start Time"]
