@@ -18,6 +18,8 @@ from MapReduce import MapReduce
 import mappers.map_letters as map_letters
 import reducers.reduce_sum as reduce_sum
 
+
 if __name__ == '__main__':
   mr = MapReduce(map_letters.map, reduce_sum.reduce)
   mr( sys.argv[1:] )
+

@@ -21,3 +21,13 @@
 #   (love the): 6
 #
 
+import sys
+from MapReduce import MapReduce
+
+import mappers.map_bigrams as map_bigrams
+import reducers.reduce_bigrams as reduce_bigrams
+
+
+if __name__ == '__main__':
+  mr = MapReduce(map_bigrams.map, reduce_bigrams.reduce)
+  mr( sys.argv[1:] )
