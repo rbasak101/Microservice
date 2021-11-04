@@ -6,6 +6,7 @@ def map(filename):
     for line in f:
         line = line.lower()
         for word in re.split('[^a-zA-Z]', line):
+
             word = word.lower()
             is_word = word.isalpha()
             if is_word == False:
@@ -14,6 +15,4 @@ def map(filename):
                 dictionary[word] = 1
             else:
                 dictionary[word] += 1
-
-
   return dictionary
