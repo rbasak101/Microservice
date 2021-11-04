@@ -5,4 +5,4 @@ def reduce(left, right):
   A = Counter(left)
   B = Counter(right)
   
-  return A+B
+  return dict(A+B)

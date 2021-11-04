@@ -18,19 +18,5 @@ def map(filename):
             key = "("+ n + " " + node + ")"
           dictionary[key] = neighbors
         neighbors = []
-    #print(dictionary)
+
   return dictionary
-    # array = []
-    # f = open(filename, "r")
-    # for line in f.readlines():
-    #   line = line.strip()
-    #   src, dst = line.split("->")
-    #   dst_list = dst.split(",")
-    #   for d in dst_list:
-    #     if src < d:
-    #       array.append("("+ src + " " + d + ")")
-    #     else:
-    #       array.append("("+ d + " "+ src + ")")
-    # f.close()
-    # print(array)
-    # return array
