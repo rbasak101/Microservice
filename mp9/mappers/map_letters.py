@@ -12,5 +12,5 @@ def map(filename):
       else:
           dictionary[char] = dictionary[char] + 1
     
-  print(dictionary)
+  #print(dictionary)
   return dictionary
