@@ -17,7 +17,9 @@ def POST_geographic_location(x, y):
   geographic_dictionary = geographic_list[0]
   owner = "Ron"
   return jsonify({"input": "GPS",
-                  "output": "City and Country",
-                  "city": geographic_dictionary["city"],
+                  "output": "city,country",
                   "owner": owner,
+                  #"url": "http://127.0.0.1:5049/<x>/<y>/",
+                  "IMID": "IM5049",
+                  "city": geographic_dictionary["city"],
                   "country": geographic_dictionary["country"]}), 200
