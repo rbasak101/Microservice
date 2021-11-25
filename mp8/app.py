@@ -124,6 +124,7 @@ def POST_weather():
   temperature = -1
   shortForecast = "Sunny"
   for properties in properties_list:
+
     if str(weather_course_time) in str(properties["startTime"]) and str(next_course_date) in str(properties["startTime"]):
       print(properties["startTime"], properties["temperature"], properties["shortForecast"])
       temperature = int(properties["temperature"])

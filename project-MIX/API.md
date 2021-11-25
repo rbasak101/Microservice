@@ -14,8 +14,8 @@ The middleware organizes the dependencies of other IMs via graph. To do this, we
 
 To achieve this, we should not only return a JSON of the data, but also the input and output of what it takes and a unique identifier IMID. The IMID serves to identify the IM and port number it uses. This number is calculated as demonstrated in the next paragraph. (port number = IM id, excluding "IM")
 Ex:  {
-        "input": "GPS coordinates",
-        "output": "City and country"
+        "input": "GPS",
+        "output": "city,country"
         "IMID": "IM5049",
         "city": "East London",
         "country": "South Africa,

@@ -1,1 +1,3 @@
-http://127.0.0.1:5049/40/-88 1
+http://127.0.0.1:5049/|GPS|city,country|1|2 
+http://127.0.0.1:5109/|country|alpha_3|2|1                     
+http://127.0.0.1:5169/|country|population|2|1
