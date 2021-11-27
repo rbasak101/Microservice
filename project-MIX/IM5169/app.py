@@ -28,7 +28,7 @@ def POST_country_to_population(country):
         return jsonify({"input": "country",
                         "output": "country population",
                         "IMID": "IM5169",
-                        "country population": pop}), 400
+                        "country population": "N/A"}), 400
 
 
    

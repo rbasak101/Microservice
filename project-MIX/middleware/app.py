@@ -1,14 +1,19 @@
 from flask import Flask, render_template, request, jsonify
 import requests
+import datetime
+import time #for testing speed to check cache works
 import os
 import reverse_geocoder as rg
 app = Flask(__name__)
 
 class Node:
   def __init__(self, url):
-    r = requests.get(url)
-    self.all_data = r.json()
-    print(self.all_data)
+    if type(url) != dict:
+      r = requests.get(url)
+      self.all_data = r.json()
+      print(self.all_data)
+    else:
+      self.all_data = url # url in this case refers to the cached output that is a dictionary
   
   def print_nodeIMID(self):
     print(self.all_data["IMID"])
@@ -90,12 +95,14 @@ class Graph: # mainly used for adding and removing
 def index():
   return render_template("index.html")
 
-
+cache = {} #key = node, value = time
 graph = Graph()
+cache_used = False
 # Route for "/MIX" (middleware):
 @app.route('/MIX', methods=["POST"])
 def POST_weather():
   print("Start of MIX")
+  t0 = time.time()
   frontend = {}
   graph.adj_dict.clear()
   graph.print_graph()
@@ -104,13 +111,11 @@ def POST_weather():
 
   if "(" in coordinates or ")" in coordinates: 
     coordinates = coordinates.replace("(","").replace(")","")
-
   try:
     lat, long = coordinates.split(",")
     print(lat, long)
   except: 
     return "Error : Missing Comma or more than two numbers entered", 400
-
   try:
     lat = float(lat)
     long = float(long)
@@ -120,7 +125,6 @@ def POST_weather():
   url_file = open("url.txt", "r")
   num_lines = sum(1 for line in open('url.txt'))
   for i in range(num_lines):
-
     print("i is", i)
     line = url_file.readline()
     line.rstrip()
@@ -128,31 +132,60 @@ def POST_weather():
     link, input, output, hierarchy, parameters = line.split("|") 
     if input == "GPS":
       url = link + str(lat)+ "/" + str(long)
-      print("Line 133", url)
-      root = Node(url)
-      graph.add_node(root)
-      frontend = {**root.all_data, **frontend}
-      continue
+      #print("Inside input == GPS", url)
+      if url not in cache:
+        print("Line 133", url)
+        root = Node(url)
+        graph.add_node(root)
+        frontend = {**root.all_data, **frontend}
+        cache[url] = [datetime.datetime.now(), root.all_data]
+        continue
+      elif (url in cache) and (cache[url][0] + datetime.timedelta(hours=2) < datetime.datetime.now()):
+        print("deleting url from cache because its old", url)
+        del cache[url]
+        continue
+      else:
+        print("Using cached value!")
+        frontend = {**cache[url][1], **frontend}
+        nodeX = Node(cache[url][1])
+        print(frontend)
+        print("Added cached node in the tree")
+        graph.add_node(nodeX)
+        cache_used == True
+        continue
 
-    for key in graph.adj_dict: # Find node with right output, input match
-      print("Line 142", key.all_data)
+    #print("size of graph adj_dict", len(graph.adj_dict))
+    for key in graph.adj_dict: # Find node with right output and input match
+      #print("Line 142", key.all_data)
       if input in key.getOutput():
         url = link + key.all_data[input]
-        print("Line 145", url)
+        #print("Line 145", url)
         break
 
-    nodeX = Node(url)
-    nodeX.print_nodeIMID()
-    graph.add_node(nodeX)
-
-    frontend = {**nodeX.all_data, **frontend}
+    print("Printing ambigous url", url)
+    if url not in cache:
+      nodeX = Node(url)
+      nodeX.print_nodeIMID()
+      graph.add_node(nodeX)
+      frontend = {**nodeX.all_data, **frontend}
+      cache[url] = [datetime.datetime.now(), nodeX.all_data]
+    elif (url in cache) and (cache[url][0] + datetime.timedelta(hours=2) < datetime.datetime.now()):
+      print("deleting url from cache because its old", url)
+      del cache[url]
+    else:
+      print("Using cached value (second check)!")
+      frontend = {**cache[url][1], **frontend}
+      print(frontend)
 
     if not line or i >= num_lines:
       break
+
   url_file.close()
 
   del frontend["owner"], frontend["input"], frontend["output"], frontend["IMID"]
   print("printing final", frontend)
 
+  t1 = time.time()
+  print("time differential", t1-t0)
   return jsonify(frontend), 200
 
