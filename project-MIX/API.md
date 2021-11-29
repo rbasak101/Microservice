@@ -3,9 +3,11 @@
 # High-Level Overview of MIX design 
 The middleware handles all incoming IMs and the addition or removal of IMs. However, removing an IM could be challenging since not all IMs will take in the same input such as GPS coordinates. Some IMs might be dependent on the output of other IMs. 
 
-To resolve this issue, a graph/hierarchy data structure of IMs is recommended. This would enables us to illustrate the dependency of one IM to another and resolve any issues if there is an IM that is removed that others rely on. To construct the graph accordingly, a url.txt file will be used, which has a specific format that inludes the server link, input of the IM, output of the IM, hierarchy, and number of parameters the IM requires. 
+To resolve this issue, a graph/hierarchy data structure of IMs is recommended. This would enables us to illustrate the dependency of one IM to another and resolve any issues if there is an IM that is removed that others rely on. To construct the graph accordingly, a url.txt file will be used, which has a specific format that inludes the server link, input of the IM, output of the IM, hierarchy, and number of parameters the IM requires, all of which are seperated by "|".
 
 The hierarchy denotes how far the IM is from the root. We denote level 1, closest to the user input, as IMs that rely only on GPS coordinates. Level 2 that rely on the output on level 1, level 3 that rely on the output of level 2, and etc...
+
+Once we obtain all urls and their corresponding information, we sort the url in ascending hierarchy order. This would enable a successful graph construction. 
 
 
 
@@ -26,11 +28,10 @@ Each IM will also have its own port in order to run. Since many people could spe
 
 We could use the roster found in campuswire and let the row number of your name indicate the port number of your first IM and add 5000 to it. So if your name appears on the 10th row, port = 5010 for your first IM. For each other IMs, add 65 accordingly (since there are approximately 60 people in the class). Ex: Person X's first IM has port 5003 since his or her name appears on the third row, second IM has port 5068, third IM has port 5133, and etc...
 
-However, to extract the information from each IM, we would need to know its route since each IM would have different input. As such, we could create a textfile of each IM's url in addition to a number denoting its hierarchy as mentioned earlier. For instance: http://127.0.0.1:5049/|GPS|city,country|1|2 
+However, to extract the information from each IM, we would need to know its route since each IM would have different input. As such, we could create the url textfile will have each IM's url in addition to other data mentioned earlier. For instance: http://127.0.0.1:5049/|GPS|city,country|1|2. 
 This implies this IM has the following url: http://127.0.0.1:5049, it's first in line of the chain of IMs, and requires 2 parameters. We follow this pattern accordingly for all IMs and then order the urls in ascending order based on their hierarchy number. This would enable us to add IMs without the worry of checking if a higher ranked IM exists or adding an IM that requires a certain input that is not given.
 
-Regarding caching, the current implementation caches the result of each IM using a dictionary and datetime library. The key would be the url (Ex: http://127.0.0.1:5049/) and the key is a list of the form [time of storage, data]
-
+Regarding caching, the current implementation caches the result of each IM using a dictionary and datetime library. The key would be the url (Ex: http://127.0.0.1:5049/) and the valie is a list of the form [time of storage, data]. We then find the current time and compare it with the time of storage to determine if the IM is old. 
 
 
 # Frontend and Middleware
