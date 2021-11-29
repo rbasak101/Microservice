@@ -7,7 +7,7 @@ To resolve this issue, a graph/hierarchy data structure of IMs is recommended. T
 
 The hierarchy denotes how far the IM is from the root. We denote level 1, closest to the user input, as IMs that rely only on GPS coordinates. Level 2 that rely on the output on level 1, level 3 that rely on the output of level 2, and etc...
 
-Once we obtain all urls and their corresponding information, we sort the url in ascending hierarchy order. This would enable a successful graph construction. 
+Once we obtain all urls and their corresponding information, we sort the url in ascending hierarchy order. We then run the the url accordingly line by line and store the output of that link such that the we could match input of a next IM. In the process of gathering data, we also create a graph that portrays the depependencies of each IM. 
 
 
 
