@@ -6,16 +6,16 @@ import requests
 
 register_json = {
   "port" : "5049", 
-  "ip": "http://127.0.0.1",
+  "ip": "http://172.22.150.7",
 
   "name": "Reverse Geocode", 
-  "creator": "Ron", 
+  "creator": "Ron Basak", 
   "tile": "Geographic location", 
 
   "dependencies": []
 }
 content = {"content-type": "application/json"}
-link = "http://127.0.0.1:5000/microservice"
+link = "http://cs240-adm-01.cs.illinois.edu:5000/microservice"
 
 requests.put(link, json = register_json)
 

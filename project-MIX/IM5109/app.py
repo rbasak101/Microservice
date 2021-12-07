@@ -1,26 +1,28 @@
 from flask import Flask, jsonify, request
+#from app import app
+#from flask_mobility import Mobility
 import pycountry
 import requests
 app = Flask(__name__)
 
 register_json = {
   "port" : "5109", 
-  "ip": "http://127.0.0.1",
+  "ip": "http://172.22.150.7",
 
   "name": "Country's alpha3", 
-  "creator": "Ron", 
+  "creator": "Ron Basak", 
   "tile": "Alpha-3 Code", 
 
   "dependencies": [
       {
           "port" : "5049", 
-          "ip": "http://127.0.0.1",
+          "ip": "http://172.22.150.7",
           "dependencies": []
       }
   ]
 }
 content = {"content-type": "application/json"}
-link = "http://127.0.0.1:5000/microservice"
+link = "http://cs240-adm-01.cs.illinois.edu:5000/microservice"
 
 requests.put(link, json = register_json)
 
