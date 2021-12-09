@@ -2,176 +2,247 @@ from flask import Flask, render_template, request, jsonify
 import requests
 from microservice import Microservice
 
+import re
 import json
 from datetime import datetime
 
-### Jackson's and Kevin's Middleware ###
 app = Flask(__name__)
 
 connected_apps = set()
-processed = {}
 cache = {}
 
+### Jackson + Kevin + Erin Middleware ###
 # Route for "/" (frontend):
 @app.route('/')
 def index():
-  return render_template("index.html")
+    return render_template("index.html")
+
 
 @app.route('/microservice', methods=['PUT'])
 def add_microservice():
-  # Verify all required keys are present in JSON:
-  requiredKeys = ['port', 'ip', 'name', 'creator', 'tile']
-  for requiredKey in requiredKeys:
-    if requiredKey not in request.json:
-      return f'Required key {requiredKey} not present in payload JSON.', 400
+    # Verify all required keys are present in JSON:
+    required_keys = ['port', 'ip', 'name', 'creator', 'tile']
+    for required_key in required_keys:
+        if required_key not in request.json:
+            return f'Required key {required_key} not present in payload JSON.', 400
 
-  # Add the microservice:
-  dependency_list = convert_dependencies_to_objects(request.json['dependencies'])
-  m = Microservice(
-    request.json['ip'] + ':' + request.json['port'],
-    dependency_list,
-    request.json['name'],
-    request.json['creator'],
-    request.json['tile'],
-  )
-  print('connection received from: ' + m.ip)
-  connected_apps.add(m)
+        if isinstance(request.json, str):
+            return f'Required key {required_key} has invalid type in payload JSON (should be str).', 400
 
-  return 'Success', 200
+    # Add the microservice:
+    m = Microservice(
+        request.json['ip'] + ':' + request.json['port'],
+        request.json.get('dependencies', []),
+        request.json['name'],
+        request.json['creator'],
+        request.json['tile'],
+    )
+    print('connection received from: ' + m.ip)
+    connected_apps.add(m)
 
-def convert_dependencies_to_objects(dependencies):
-  dp_list = []
-  for x in dependencies:
-    # recursively fetch dependency lists where necessary
-    if list(x['dependencies']) != list():
-      dp_list.append(Microservice(x['ip'] + ':' + x['port'], convert_dependencies_to_objects(x['dependencies'])))
-    else:
-      dp_list.append(Microservice(x['ip'] + ':' + x['port'], []))
-  
-  return dp_list
+    return 'Success', 200
 
 
 @app.route('/microservice', methods=['DELETE'])
 def remove_microservice():
-  print('connection received from: ' + (request.host))
-  for app in connected_apps:
-    if app.ip == request.host:
-      connected_apps.remove(app)
-      break
+    print(f'delete request received from: {request.host}')
+    previous_len = len(connected_apps)
+    j = request.json
 
-  return 'Success', 200
+    if 'ip' not in j or 'port' not in j:
+        return 'Invalid Input', 400
+
+    ip = j['ip'] + ':' + j['port']
+    m = Microservice(ip, [])
+
+    connected_apps.discard(m)
+    if len(connected_apps) == previous_len:
+        return 'Not Found', 404
+
+    return 'Success', 200
+
+
+@app.route('/status', methods=["GET"])
+def list_all_connected_services():
+    status = [{
+        'name': service.name,
+        'creator': service.creator,
+        'ip': service.ip,
+        'dependencies': [depend.ip for depend in service.dependencies] if service.dependencies is not None else []
+    } for service in connected_apps]
+
+    return jsonify(status), 200
 
 
 # Route for "/MIX" (middleware):
 @app.route('/MIX', methods=["POST"])
 def POST_MIX():
-  # process form data
-  location = request.form['location']
-  s = location.split(',')
-  lat = float(s[0])
-  lon = float(s[1])
+    global connected_apps
+    # process form data
+    location = request.form['location']
 
-  if abs(lat) > 90 or abs(lon) > 90:
-    return 'Invalid input', 400
+    match = re.match(r"\s*([+-]?([0-9]*[.])?[0-9]+)[,\s]+([+-]?([0-9]*[.])?[0-9]+)\s*", location)
+    if match is None:
+        return 'Invalid input', 400
 
-  # clear list of processed requests from connected apps
-  processed.clear()
+    lat = float(match.group(1))
+    lon = float(match.group(3))
 
-  # aggregate JSON from all IMs
-  r = []
-  for app in connected_apps:
-    # create a response with the metadata about the IM service:
-    j = {
-      '_metadata': {
-        'name': app.name,
-        'creator': app.creator,
-        'tile': app.tile,
-      }
-    }
+    if abs(lat) > 90:
+        return 'Invalid latitude', 400
 
-    # add the IM response:
-    if cache_hit((lat, lon), app):
-      j.update( cache[(lat, lon)][app.ip][0] )
-    else:
-      j.update( process_request(app, lat, lon) )
+    if abs(lon) > 180:
+        return 'Invalid longitude', 400
 
-    r.append(j)
+    # aggregate JSON from all IMs
+    r = []
+    for im in connected_apps.copy():
+        # get the IM response:
+        j = process_request(im, lat, lon)
 
-  return jsonify(r), 200
+        # add metadata about the IM service:
+        j.update({
+            '_metadata': {
+                'name': im.name,
+                'creator': im.creator,
+                'tile': im.tile,
+                'max-age': im.max_age
+            }
+        })
 
-def process_request(service: Microservice, lat: float, lon: float) -> dict:
-  # if we've already processed an IM, we're finished
-  if service.ip in processed:
-    return processed[service.ip]
+        r.append(j)
 
-  if len(service.dependencies) == 0:
-    # send a request to each service
-    r = requests.get(service.ip, json={'latitude': lat, 'longitude': lon})
-  else:
-    # aggregate all dependency data and send as a request to our IM
-    dependency_json = get_dependency_data(service, lat, lon)
-    r = requests.get(service.ip, json=dependency_json)
-
-  # if an IM returns a 400/500 level response, evaluate it as an empty JSON schema
-  if r.status_code >= 400:
-    print('service ' + service.ip + ' returned error code ' + str(r.status_code))
-    return {}
-
-  add_entry_to_cache((lat, lon), service, r)
-  processed[service.ip] = r.json()
-  return r.json()
+    return jsonify(r), 200
 
 
-def get_dependency_data(service: Microservice, lat: float, lon: float) -> dict:
-  j = {}
-  for dependency in service.dependencies:
-    # handle dependencies which have their own dependencies recursively
-    if len(dependency.dependencies) > 0:
-      for dd in dependency.dependencies:
-        j.update(get_dependency_data(dd, lat, lon))
+def get_dependencies(dependency_info: [dict]) -> [Microservice]:
+    """
+    Convert a json list of dependencies into a list of Microservice objects,
+    by searching for the appropriate Microservices in connected_apps.
+    """
+    dependency_list = []
+    for dependency in dependency_info:
+        # search for a matching IM
+        if 'name' in dependency and 'creator' in dependency:
+            for im in connected_apps:
+                if im.name == dependency['name'] and im.creator == dependency['creator']:
+                    dependency_list.append(im)
+                    break
+            else:
+                raise ValueError('Dependency not found')
+        elif 'ip' in dependency and 'port' in dependency:
+            for im in connected_apps:
+                if im.ip == dependency['ip'] + ':' + dependency['port']:
+                    dependency_list.append(im)
+                    break
+            else:
+                raise ValueError('Dependency not found')
+        else:
+            raise ValueError('Not enough dependency information')
+    return dependency_list
 
-    else:
-      # if we've already made a request to this IM, just fetch from our processed requests dict
-      if dependency.ip in processed:
-        j.update(processed[dependency.ip])
-      else:
-        # make new request to IM
-        r = requests.get(dependency.ip, json={'latitude': lat, 'longitude': lon})
-        if r.status_code >= 400:
-          print('service ' + service.ip + ' returned error code ' + str(r.status_code))
-          continue
 
-        add_entry_to_cache((lat, lon), dependency, r)
-        processed[service.ip] = r.json()
-        j.update(r.json())       
+def process_request(service: Microservice, lat: float, lon: float, visited=tuple()) -> dict:
+    """
+    Return the json output of a microservice, recursively calling this function for dependencies.
+    Any cache hits will be returned.
+    """
+    # cache check
+    if cache_hit((lat, lon), service):
+        return cache[(lat, lon)][service.ip][0]
 
-  return j
+    # first time dependency search
+    if service.dependencies is None:
+        try:
+            service.dependencies = get_dependencies(service.dependency_info)
+        except ValueError as e:
+            print(f'{e} for service {service.ip}')
+            return {}
 
-def parse_cache_header(header: str) -> int:
-  return float(header.split('=')[1])
+    # aggregate all dependency data (starting with lat, lon) and send as a request to our IM
+    dependency_results = {'latitude': lat, 'longitude': lon}
+
+    for dependency in service.dependencies:
+        if dependency in visited:
+            # check for circular dependencies
+            print(f'Circular dependency: asking for {dependency} on top of {list(visited)}')
+            return {}
+        else:
+            # concatenate results to dependency_results
+            dependency_results.update(process_request(dependency, lat, lon, visited + (dependency,)))
+
+    return make_im_request(service, dependency_results, lat, lon)
+
+
+def make_im_request(service: Microservice, j: dict, lat: float, lon: float) -> dict:
+    """
+    Return the json response after a GET request to a service (with a json input j).
+    """
+    try:
+        r = requests.get(service.ip, json=j, timeout=2)
+    except requests.exceptions.RequestException:
+        print(f'service {service.name} at {service.ip} not connecting. removed from MIX!')
+        connected_apps.discard(service)
+        return {}
+
+    if 500 > r.status_code >= 400:
+        print(f'service {service.name} at {service.ip} returned error code {str(r.status_code)}')
+        return {}
+    elif r.status_code >= 500:
+        print(f'service {service.name} at {service.ip} returned error code {str(r.status_code)} - removed from MIX!')
+        connected_apps.discard(service)
+        return {}
+
+    add_entry_to_cache((lat, lon), service, r)
+    return r.json()
+
+
+def parse_cache_header(header: str) -> float:
+    """
+    Return the age from a Cache-Control header string.
+    raises ValueError if the Cache-Control is not recognized.
+    """
+    m = re.match(r"max-age=(\d+)", header)
+    if m is None:
+        raise ValueError
+    return float(m.group(1))
+
 
 def add_entry_to_cache(latlon: tuple, service: Microservice, response) -> None:
-  # set max_age for a service if it has not been set already
-  if service.max_age == 0:
-    service.max_age = parse_cache_header(response.headers['Cache-Control'])
-  
-  # enter the service response json into our cache
-  if latlon not in cache:
-    cache[latlon] = {service.ip : (response.json(), datetime.now())}
-  else:
-    cache[latlon][service.ip] = (response.json(), datetime.now())
+    """
+    Add a microservice response to cache.
+    """
+    # set max_age for a service if it has not been set already
+    if service.max_age is None:
+        if 'Cache-Control' not in response.headers or 'max-age' not in response.headers['Cache-Control']:
+            service.max_age = 0  # no cache
+        else:
+            try:
+                service.max_age = parse_cache_header(response.headers['Cache-Control'])
+            except ValueError:
+                print(f'Bad Cache-Control for service {service.name} at {service.ip} - falling back to no-cache.')
+                service.max_age = 0
 
-def cache_hit(latlong: tuple, service: Microservice) -> bool:
-  if service.max_age == 0 or latlong not in cache or service.ip not in cache.get(latlong):
-    print('cache miss! entry not in cache')
+    # enter the service response json into our cache
+    if latlon not in cache:
+        cache[latlon] = {service.ip: (response.json(), datetime.now())}
+    else:
+        cache[latlon][service.ip] = (response.json(), datetime.now())
+
+
+def cache_hit(latlon: tuple, service: Microservice) -> bool:
+    """
+    Return whether a cached response is available.
+    """
+    if service.max_age == 0 or latlon not in cache or service.ip not in cache.get(latlon):
+        print('cache miss! entry not in cache')
+        return False
+
+    curr_time = datetime.now()
+    timediff = curr_time - cache[latlon][service.ip][1]
+
+    if timediff.total_seconds() < service.max_age:
+        print('cache hit!')
+        return True
+    print('cache miss! exceeded max_age')
     return False
-  
-  curr_time = datetime.now()
-  timediff = curr_time - cache[latlong][service.ip][1]
-
-  if timediff.total_seconds() < service.max_age:
-    print('cache hit!')
-    return True
-
-  print('cache miss! exceeded max_age')
-  return False

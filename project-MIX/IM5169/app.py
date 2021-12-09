@@ -7,22 +7,22 @@ app = Flask(__name__)
 
 register_json = {
   "port" : "5169", 
-  "ip": "http://127.0.0.1",
+  "ip": "http://172.22.150.7",
 
   "name": "Country's Population", 
-  "creator": "Ron", 
+  "creator": "Ron Basak", 
   "tile": "Population", 
 
   "dependencies": [
       {
           "port" : "5049", 
-          "ip": "http://127.0.0.1",
+          "ip": "http://172.22.150.7",
           "dependencies": []
       }
   ]
 }
 content = {"content-type": "application/json"}
-link = "http://127.0.0.1:5000/microservice"
+link = "http://cs240-adm-01.cs.illinois.edu:5000/microservice"
 
 requests.put(link, json = register_json)
 
@@ -36,7 +36,7 @@ def POST_country_to_population():
     data = request.json
     print(data)
     country = data["country"]
-    nation = CountryInfo(country)
+    nation = CountryInfo(country) #CountryInfo API has some flaws: Ex: Vatican City
     try:
         if country == "Vatican City":
             pop = 825

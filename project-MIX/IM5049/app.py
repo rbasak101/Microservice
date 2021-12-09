@@ -38,20 +38,32 @@ def POST_geographic_location():
   geographic_list = reverse_geocode.search(coordinates) # a list of dictionary for each coordinate
   geographic_dictionary = geographic_list[0]
 
+  google = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + str(lat) +"," + str(long) + "&key=AIzaSyBzCeFbZYSp4ks07Vu3rHb-S5BrvDyNKMg"
+  r = requests.get(google)
+  print(google)
+  google_data = r.json()
+  city = ""
+  country = ""
+  for i in google_data["results"][0]["address_components"]:
+    if "locality" in i["types"]:
+      city = i["long_name"]
+      print(i["long_name"])
+    if "country" in i["types"]:
+      country = i["long_name"]
+      print(i["long_name"])
+  #print(google_data["results"])
+
   print("city", geographic_dictionary["city"],
         "country", geographic_dictionary["country"])
-
-  answer = jsonify({ "city": geographic_dictionary["city"],
-                   "country": geographic_dictionary["country"]})
+  print("city", city,
+        "country", country)
+  if city == "" or country == "":
+    answer = jsonify({ "city": geographic_dictionary["city"],
+                    "country": geographic_dictionary["country"]}) # Using PyCountry API
+  else:
+    answer = jsonify({ "city": city,
+                       "country": country}) # Using Google API if not in water
   
   answer.headers["Cache-Control"] = "max-age=350"
 
   return answer, 200
-  
-  # return jsonify({"input": "GPS",
-  #                 "output": "city,country",
-  #                 "owner": owner,
-  #                 #"url": "http://127.0.0.1:5049/<x>/<y>/",
-  #                 "IMID": "IM5049",
-  #                 "city": geographic_dictionary["city"],
-  #                 "country": geographic_dictionary["country"]}), 200
