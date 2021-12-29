@@ -1,5 +1,0 @@
-A->B
-B->A,C,D
-C->B,D
-D->B,C,E
-E->D
